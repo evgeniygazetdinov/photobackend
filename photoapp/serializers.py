@@ -6,29 +6,49 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 
 
-
 class FileSerializer(serializers.ModelSerializer):
     def validate(self, data):
-        #TODO VALIDATE NAME
-        if ((data['image']).endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif'))):
-            print(validate)
-            return data    
-        print('not valid')
+        image = data['image']
+        if str(image.name).lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
+            if image.image:
+                if image.size != 0:
+                    return data
+        
 
 
     def create(self, validated_data):
         #TODO SAVE HERE
-        """
-        path = default_storage.save('tmp/somename.mp3', ContentFile(data.read()))
-        tmp_file = os.path.join(settings.MEDIA_ROOT, path)
-        """
-        blogs=Blogs.objects.latest('created_at')
         image=validated_data.pop('image')
-        print('here')
-        for img in image:
-            photo=File.objects.create(image=image)
+        print(self.context)
+        photo=File.objects.create(image=image,owner=self.context['user'])
+        
         return photo
 
     class Meta:
         model = File
-        fields = "__all__"
+        fields = ('image',)
+
+from rest_framework import serializers
+from django.contrib.auth import get_user_model # If used custom user model
+
+UserModel = get_user_model()
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    password = serializers.CharField(write_only=True)
+
+    def create(self, validated_data):
+
+        user = UserModel.objects.create(
+            username=validated_data['username']
+        )
+        user.set_password(validated_data['password'])
+        user.save()
+
+        return user
+
+    class Meta:
+        model = UserModel
+        # Tuple of serialized model fields (see link [2])
+        fields = ( "id", "username", "password", )

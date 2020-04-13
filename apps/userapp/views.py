@@ -69,7 +69,7 @@ def delete_user(request, user_id):
                 'code': status.HTTP_400_BAD_REQUEST,
             }
         return Response(response,status.HTTP_400_BAD_REQUEST)
-    cur_user.objects.get(id=user_id).delete()
+    User.objects.get(id=user_id).delete()
 
     response = {
                 'status': 'success',

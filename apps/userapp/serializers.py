@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(source='photouser.user.password',write_only=True)
     username = serializers.CharField(source="photouser.user.username")
     is_admin = serializers.CharField(source="photouser.user.is_staff",required=False)
-    date = serializers.CharField(source="photouser.date",required=False)
+    date = serializers.CharField(source="photouser.date",required=False, allow_null=True)
     def create(self, validated_data):
         print(validated_data)
         print(validated_data['photouser']['user']['username'])

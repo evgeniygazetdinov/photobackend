@@ -1,20 +1,27 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model # If used custom user model
+from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
+from .models import PhotoUser
 
 
 
-UserModel = get_user_model()
+UserModel = PhotoUser
+
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
+    id = serializers.CharField(source="photouser.user.id",required=False)
+    password = serializers.CharField(source='photouser.user.password',write_only=True)
+    username = serializers.CharField(source="photouser.user.username")
+    is_admin = serializers.CharField(source="photouser.user.is_staff",required=False)
+    date = serializers.CharField(source="photouser.date",required=False)
     def create(self, validated_data):
-
-        user = UserModel.objects.create(
-            username=validated_data['username']
+        print(validated_data)
+        print(validated_data['photouser']['user']['username'])
+        user = User.objects.create(
+            username=validated_data['photouser']['user']['username']
         )
-        user.set_password(validated_data['password'])
+        user.set_password(validated_data['photouser']['user']['password'])
         user.save()
 
         return user
@@ -26,9 +33,9 @@ class UserSerializer(serializers.ModelSerializer):
         return super(UserSerializer, self).update(instance, validated_data)
 
     class Meta:
-        model = UserModel
-        # Tuple of serialized model fields (see link [2])
-        fields = ( "id", "username", 'password')
+        model = User
+    
+        fields = ('id','username','is_admin','date','password')
   
 
 class ChangePasswordSerializer(serializers.Serializer):

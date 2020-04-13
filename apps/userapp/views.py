@@ -1,23 +1,19 @@
 from rest_framework import permissions
 from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView
 from rest_framework.views import APIView
-from django.contrib.auth import get_user_model # If used custom user model
-from .serializers import UserSerializer,ChangePasswordSerializer
+from django.contrib.auth.models import User # If used custom user model
+from .serializers import UserSerializer, ChangePasswordSerializer
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated, IsAdminUser  # 
-from django.contrib.auth.models import User
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
-from django.contrib.auth.models import User
-from rest_framework.permissions import IsAuthenticated   
 from rest_framework.decorators import api_view,permission_classes,action
-
+from .models import PhotoUser
 
 
 class CreateUserView(CreateAPIView):
-    model = get_user_model()
+    model = PhotoUser
     permission_classes = [
       permissions.AllowAny # Or anon users can't register
     ]
@@ -26,14 +22,14 @@ class CreateUserView(CreateAPIView):
 
 class AllUserView(ListAPIView):
     permission_classes = (IsAdminUser,)
-    queryset = User.objects.all()
+    queryset = User.objects.all().select_related('photouser')
     serializer_class = UserSerializer
 
 
 
 class ChangePasswordView(UpdateAPIView):
     serializer_class = ChangePasswordSerializer
-    model = User
+    model = PhotoUser
     permission_classes = (IsAuthenticated,)
 
     def get_object(self, queryset=None):
@@ -65,7 +61,7 @@ class ChangePasswordView(UpdateAPIView):
 @api_view(['delete'])
 @permission_classes((IsAdminUser, ))
 def delete_user(request, user_id):
-    cur_user = get_user_model()
+    cur_user = PhotoUser
 
     if not (cur_user.objects.filter(id=user_id).exists()):
         response = {

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
-from .models import PhotoUser
+from .models import PhotoUser,Photo
 
 
 
@@ -10,18 +10,29 @@ UserModel = PhotoUser
 
 
 class UserSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(source="photouser.user.id",required=False)
-    password = serializers.CharField(source='photouser.user.password',write_only=True)
-    username = serializers.CharField(source="photouser.user.username")
-    is_admin = serializers.CharField(source="photouser.user.is_staff",required=False)
-    date = serializers.CharField(source="photouser.date",required=False, allow_null=True)
+    def get_images(self,obj):
+        #iterate thoght photouser
+        all = (obj.date.all())
+        res = []
+        for image in all:
+            res.append(image.photo_date)
+        return res
+
+
+
+
+
+    id = serializers.CharField(source="user.id",required=False)
+    password = serializers.CharField(source='user.password',write_only=True)
+    username = serializers.CharField(source="user.username")
+    is_admin = serializers.CharField(source="user.is_staff",required=False)
+    date = serializers.SerializerMethodField(method_name='get_images')
+    #date = serializers.CharField(source="photouser.date",required=False, allow_null=True)
     def create(self, validated_data):
-        print(validated_data)
-        print(validated_data['photouser']['user']['username'])
-        user = User.objects.create(
-            username=validated_data['photouser']['user']['username']
+        user = PhotoUser.objects.create(
+            user__username=validated_data['username']
         )
-        user.set_password(validated_data['photouser']['user']['password'])
+        user.set_password(validated_data['password'])
         user.save()
 
         return user

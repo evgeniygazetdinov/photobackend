@@ -8,7 +8,7 @@ from django.contrib.auth.models import PermissionsMixin
 
 
 class Photo(models.Model):
-    photo_date = models.CharField(default='132', max_length=50)
+    photo_date = models.CharField(default ="323",max_length=50)
 
 
 
@@ -16,7 +16,8 @@ class Photo(models.Model):
 # Create your models here.
 class PhotoUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    date = models.ForeignKey(Photo,on_delete=models.CASCADE,null=True)
+    #date =  models.OneToOneField(Photo, on_delete=models.CASCADE,unique=False,blank=True,null=True)
+    date =  models.ManyToManyField(Photo)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

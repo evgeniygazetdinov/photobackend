@@ -22,9 +22,8 @@ class CreateUserView(CreateAPIView):
 
 class AllUserView(ListAPIView):
     permission_classes = (IsAdminUser,)
-    queryset = User.objects.all().select_related('photouser')
     serializer_class = UserSerializer
-
+    queryset = PhotoUser.objects.all()
 
 
 class ChangePasswordView(UpdateAPIView):

@@ -15,11 +15,9 @@ class UserSerializer(serializers.ModelSerializer):
         all = (obj.date.all())
         res = []
         for image in all:
-            res.append(image.photo_date)
+            print(image.__dict__)
+            res.append(image.id)
         return res
-
-
-
 
 
     id = serializers.CharField(source="user.id",required=False)

@@ -51,7 +51,12 @@ class FileSerializer(serializers.ModelSerializer):
             if image.image:
                 if image.size != 0:
                     return data
-        
+    def move_to_user(self,path_from_move,need_path,image):
+        if not os.path.exists(need_path):
+            os.mkdir(need_path)
+            shutil.move(path_from_move,need_path+image.name)
+        else:
+            shutil.move(path_from_move,need_path+image.name)        
 
 
     def create(self,validated_data):
@@ -64,10 +69,7 @@ class FileSerializer(serializers.ModelSerializer):
         need_path = (os.getcwd()+'/media/'+str(current_user.user.username)+'/')
         path_now = os.path.abspath(image.name)
         path_from_move = os.path.dirname(path_now)+'/media/'+image.name
-        if not os.path.exists(need_path):
-            os.mkdir(need_path)
-            os.rename(path_from_move,need_path+image.name)
-        os.rename(path_from_move,need_path+image.name)
+        self.move_to_user(path_from_move,need_path,image)
         return photo
 
     class Meta:

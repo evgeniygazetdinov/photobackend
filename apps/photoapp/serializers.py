@@ -8,6 +8,15 @@ from django.conf import settings
 
 
 class FileSerializer(serializers.ModelSerializer):
+    def get_user(self,obj):
+        #iterate thoght photouser
+        all = (obj.user.all())
+        res = []
+        for image in all:
+            res.append(image.user.username)
+        return res
+
+    user = serializers.SerializerMethodField(method_name='get_user')
     def validate(self, data):
         image = data['image']
         if str(image.name).lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
@@ -20,13 +29,11 @@ class FileSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         #TODO SAVE HERE
         image = validated_data.pop('image')
-        print(self.context)
         current_user = self.context['user']
         photo = Photo.objects.create(image=image)
         photo.user.add(current_user)
-        print(photo.__dict__)
         return photo
 
     class Meta:
         model = Photo
-        fields = ('image',)
+        fields = ('image','user')

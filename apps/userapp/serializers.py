@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
 from .models import PhotoUser
+from photoapp.models import Photo
+from django.forms.models import model_to_dict
 
 UserModel = PhotoUser
 
@@ -9,12 +11,10 @@ UserModel = PhotoUser
 
 class UserSerializer(serializers.ModelSerializer):
     def get_images(self,obj):
-        #iterate thoght photouser
-        all = (obj.image.all())
         res = []
-        for image in all:
-            print(image.__dict__)
-            res.append(image.id)
+        photos = Photo.objects.all().filter(user__user__username=obj.user.username)
+        for photo in photos:
+            res.append(photo.image.name)
         return res
 
 
@@ -23,7 +23,6 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     is_admin = serializers.CharField(source="user.is_staff",required=False)
     photos = serializers.SerializerMethodField(method_name='get_images')
-    #date = serializers.CharField(source="photouser.date",required=False, allow_null=True)
     def create(self, validated_data):
         user = PhotoUser.objects.create(
             user__username=validated_data['username']

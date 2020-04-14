@@ -1,18 +1,31 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model # If used custom user model
+from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
+from .models import PhotoUser
+from photoapp.models import Photo
+from django.forms.models import model_to_dict
 
+UserModel = PhotoUser
 
-
-UserModel = get_user_model()
 
 
 class UserSerializer(serializers.ModelSerializer):
-    password = serializers.CharField(write_only=True)
-    def create(self, validated_data):
+    def get_images(self,obj):
+        res = []
+        photos = Photo.objects.all().filter(user__user__username=obj.user.username)
+        for photo in photos:
+            res.append(photo.image.name)
+        return res
 
-        user = UserModel.objects.create(
-            username=validated_data['username']
+
+    id = serializers.CharField(source="user.id",required=False)
+    password = serializers.CharField(source='user.password',write_only=True)
+    username = serializers.CharField(source="user.username")
+    is_admin = serializers.CharField(source="user.is_staff",required=False)
+    photos = serializers.SerializerMethodField(method_name='get_images')
+    def create(self, validated_data):
+        user = PhotoUser.objects.create(
+            user__username=validated_data['username']
         )
         user.set_password(validated_data['password'])
         user.save()
@@ -26,9 +39,9 @@ class UserSerializer(serializers.ModelSerializer):
         return super(UserSerializer, self).update(instance, validated_data)
 
     class Meta:
-        model = UserModel
-        # Tuple of serialized model fields (see link [2])
-        fields = ( "id", "username", 'password')
+        model = User
+    
+        fields = ('id','username','is_admin','photos','password')
   
 
 class ChangePasswordSerializer(serializers.Serializer):

@@ -3,13 +3,19 @@ from django.core.files.storage import Storage
 import time
 import os
 from django.conf import settings
+import uuid
+
+
+class PhotoViews(models.Model):
+    views = models.DateTimeField(auto_now_add=True)
 
 
 class Photo(models.Model):
-    image = models.ImageField()
     user = models.ManyToManyField('userapp.photouser')
+    image = models.ImageField()
     created_date = models.DateTimeField(auto_now_add=True)
+    views = models.ManyToManyField(PhotoViews)
 
-# class PhotoViews(models.Model):
-#     image = models.ManyToManyField('userapp.photouser')
-#     data_views = 
+
+ 
+

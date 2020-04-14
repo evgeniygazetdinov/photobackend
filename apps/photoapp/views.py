@@ -10,6 +10,7 @@ from .models import Photo
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated  # <-- Here
 from userapp.models import PhotoUser
+from rest_framework.decorators import api_view,permission_classes,action
 
 
       
@@ -31,20 +32,11 @@ class FileUploadView(ListAPIView):
 
 
 
-        """
-        #serializers.PY
-        class ProfileImageSerialiser(serializers.ModelSerializer):
-            class Meta:
-                model = MODEL_NAME
-                fields = ('FIELD1', 'FIELD2')
 
-        #views.py
-        class GetProfileImageViewSet(generics.ListAPIView):
-            serializer_class = ProfileImageSerialiser
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
+def get_picture_by_id(request,picture_id):
+    cur_user = PhotoUser.objects.get(user__username=request.user)
+    return Response(serializer.data,status.HTTP_200_OK)
 
-            def get_queryset(self):
-                user_id = self.kwargs['user_id']
-                image = MODEL_NAME.objects.filter(user_id=user_id)
-                return image
-        """
 

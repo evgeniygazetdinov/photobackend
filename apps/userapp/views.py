@@ -12,6 +12,13 @@ from rest_framework.decorators import api_view,permission_classes,action
 from .models import PhotoUser
 
 
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
+def check_user(request):
+    cur_user = PhotoUser.objects.get(user__username=request.user)
+    serializer = UserSerializer(cur_user)
+    return Response(serializer.data,status.HTTP_200_OK)
+
 class CreateUserView(CreateAPIView):
     model = PhotoUser
     permission_classes = [

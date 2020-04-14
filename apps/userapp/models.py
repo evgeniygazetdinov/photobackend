@@ -9,7 +9,6 @@ from photoapp.models import Photo
 # Create your models here.
 class PhotoUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    #date =  models.OneToOneField(Photo, on_delete=models.CASCADE,unique=False,blank=True,null=True)
     image =  models.ManyToManyField('photoapp.photo')
 
 @receiver(post_save, sender=User)

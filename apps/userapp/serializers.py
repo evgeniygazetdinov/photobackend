@@ -24,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     is_admin = serializers.CharField(source="user.is_staff",required=False)
     photos = serializers.SerializerMethodField(method_name='get_images')
+    
     def create(self, validated_data):
         user = PhotoUser.objects.create(
             user__username=validated_data['username']

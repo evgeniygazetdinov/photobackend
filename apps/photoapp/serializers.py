@@ -7,8 +7,10 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 import shutil
 from datetime import datetime, timedelta
-
-
+from django.urls import reverse
+from django.utils.crypto import get_random_string
+from cryptography.fernet import Fernet
+import struct
 
 
 class CountViewsPhotoSerializer(serializers.ModelSerializer):
@@ -26,15 +28,25 @@ class FileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
     user = serializers.SerializerMethodField(method_name='get_user')
     views = serializers.SerializerMethodField(method_name='display_views')
+    unique_links = serializers.SerializerMethodField(method_name='generate_link')
+
+    def generate_link(self,obj):
+        key = Fernet.generate_key()
+        cipher_suite = Fernet(key)
+        byte_id = struct.pack("B", obj.id)
+        cipher_text = cipher_suite.encrypt(b"%b"%byte_id)
+
+        randomstring = get_random_string(length=4)
+        link = reverse('unique', kwargs={'random_string':randomstring,'encript':cipher_text.decode("utf-8"),'key':key.decode("utf-8")})
+        return 'http://127.0.0.1:8000'+link
+
+
 
     def display_views(self,obj):
         res = []
-        
-        
         views = obj.views.all()
         for view in views:
             obj_time = view.views+timedelta(hours=3)
-            
             res.append(obj_time.strftime("%Y-%m-%d %H:%M"))
         return res
 
@@ -93,4 +105,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user', 'created_date','views')
+        fields = ('id', 'image', 'user', 'created_date','views','unique_links')

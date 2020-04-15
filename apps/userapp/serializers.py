@@ -3,6 +3,7 @@ from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
 from .models import PhotoUser
 from photoapp.models import Photo
+from photoapp.serializers import FileSerializer
 from django.forms.models import model_to_dict
 
 UserModel = PhotoUser
@@ -11,11 +12,9 @@ UserModel = PhotoUser
 
 class UserSerializer(serializers.ModelSerializer):
     def get_images(self,obj):
-        res = []
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
-        for photo in photos:
-            res.append(photo.image.name)
-        return res
+        serializer = FileSerializer(instance=photos, many=True)
+        return serializer.data
 
 
     id = serializers.CharField(source="user.id",required=False)

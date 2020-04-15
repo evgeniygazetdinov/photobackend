@@ -6,7 +6,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.conf import settings
 import shutil
-
+import datetime 
 
 
 class CountViewsPhotoSerializer(serializers.ModelSerializer):
@@ -44,18 +44,17 @@ class FileSerializer(serializers.ModelSerializer):
             res.append(image.user.username)
         return res
 
+
     def validate(self, data):
         image = data['image']
         if str(image.name).lower().endswith(('.png', '.jpg', '.jpeg', '.tiff', '.bmp', '.gif')):
             if image.image:
                 if image.size != 0:
                     return data
+
+
     def move_to_user(self,path_from_move,need_path,image):
-        if not os.path.exists(need_path):
-            os.mkdir(need_path)
-            shutil.move(path_from_move,need_path+image.name)
-        else:
-            shutil.move(path_from_move,need_path+image.name)        
+        pass
 
 
     def create(self,validated_data):
@@ -63,15 +62,21 @@ class FileSerializer(serializers.ModelSerializer):
         image = validated_data.pop('image')
         current_user = self.context['user']
         request = self.context.get('request')
+        #need_path = (os.getcwd()+'/media/'+str(current_user.user.username)+'/')
+        #path_now = os.path.abspath(image.name)
+        #path_from_move = os.path.dirname(path_now)+'/media/'+image.name
+       # if not os.path.exists(need_path):
+       #     os.mkdir(need_path)
+     
+        #shutil.move(path_from_move,need_path+image.name) 
         photo = Photo.objects.create(image=image)
         photo.user.add(current_user)
-        need_path = (os.getcwd()+'/media/'+str(current_user.user.username)+'/')
-        path_now = os.path.abspath(image.name)
-        path_from_move = os.path.dirname(path_now)+'/media/'+image.name
-        self.move_to_user(path_from_move,need_path,image)
-        #TODO UPDATE PATH
+        #photo.image.upload_to = need_path+image.name
+       
+        #print(datetime.datetime.now())
+        #dir(photo)
         return photo
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user', 'created_date')
+        fields = ('id', 'image', 'user', 'created_date','views')

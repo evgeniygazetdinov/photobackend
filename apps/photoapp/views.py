@@ -1,18 +1,16 @@
-from rest_framework.parsers import FileUploadParser
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework import status
-from rest_framework.parsers import MultiPartParser
-from rest_framework.decorators import parser_classes
 from .serializers import FileSerializer
 import json
-from .models import Photo
-from rest_framework import permissions
+from .models import Photo,PhotoViews
 from rest_framework.permissions import IsAuthenticated  # <-- Here
 from userapp.models import PhotoUser
 from rest_framework.decorators import api_view,permission_classes,action
-
-
+from django.core.files.base import ContentFile
+from django.shortcuts import render_to_response, get_object_or_404
+from django.conf import settings
+import datetime
       
 class FileUploadView(ListAPIView):
     permission_classes = (IsAuthenticated,)  
@@ -37,6 +35,15 @@ class FileUploadView(ListAPIView):
 @permission_classes((IsAuthenticated, ))
 def get_picture_by_id(request,picture_id):
     cur_user = PhotoUser.objects.get(user__username=request.user)
-    return Response(serializer.data,status.HTTP_200_OK)
+    photo = Photo.objects.get(id = picture_id,user =cur_user)
+    host = request.scheme +"://"+ request.get_host()
+    
+    now = datetime.datetime.now()
+    photo_view = PhotoViews()
+    photo_view.save()
+    photo.views.add(photo_view)
+    
+    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url}
+    return render_to_response('photoapp/photo.html',pic_propenty)
 
 

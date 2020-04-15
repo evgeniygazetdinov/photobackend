@@ -50,10 +50,17 @@ you must be authorized as admin
 
 
 
-
-photos
+**************************
+photo/
 **************************
 
 upload/ |POST
 
 you must authorized send pic in body
+
+
+get_picture_by_id/<id> |GET
+
+you must be authorized
+
+-with count your views

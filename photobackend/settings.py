@@ -40,12 +40,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_extensions',
+    'shell_plus',
     'rest_framework',
-    'photoapp',
-<<<<<<< HEAD
-=======
-    'userapp'
->>>>>>> aa24a8a4b5dc637cd94dac0f3054aab206c80e40
+    'userapp',
+    'photoapp'
    
 ]
 
@@ -57,6 +56,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    #'photobackend.middleware.CurrentUserMiddleware',
 ]
 
 ROOT_URLCONF = 'photobackend.urls'

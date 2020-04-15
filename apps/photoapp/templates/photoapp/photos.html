@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="row" style="text-align:center;">
+{% for image in images %}
+ <div class="well image">
+     <h5>
+       {{ image.filename }} (<abbr title="{{ image.md5sum }}">md5</abbr>)
+     </h5>
+
+     <div class="imgholder">
+       <a href="{{ settings.MEDIA_URL }}{{ image.filename }}" class="imglink">
+         <img src="{{ settings.MEDIA_URL }}thumbs/{{ image.filename }}" alt="{{ image.filename }}" />
+       </a>
+     </div>
+
+     <ul class="unstyled">
+       <li>orig: {{ image.orig_filename|slice:":16" }}</li>
+       <li>user: {{ image.uploader.username }}</li>
+       <li>url: <input type="text" value="{{ settings.MEDIA_URL }}{{image.filename}}" class="input-small" /></li>
+       <li><a href="http://api.imgur.com/2/upload?url={{ settings.MEDIA_URL }}{{image.filename}}">Imgur Mirror</a></li>
+     </ul>
+ </div>
+{% endfor %}
+
+<p>Images: {{ images|length }}</p>
+</div>
+<script>
+    $("a.imglink").colorbox();
+</script>

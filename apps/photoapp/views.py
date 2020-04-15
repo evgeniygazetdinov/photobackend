@@ -8,9 +8,6 @@ from .serializers import FileSerializer
 import json
 from .models import File
 from rest_framework import permissions
-from rest_framework.generics import CreateAPIView
-from django.contrib.auth import get_user_model # If used custom user model
-from .serializers import UserSerializer
 from rest_framework.permissions import IsAuthenticated  # <-- Here
 
 
@@ -18,12 +15,7 @@ from rest_framework.permissions import IsAuthenticated  # <-- Here
       
 class FileUploadView(ListAPIView):
     permission_classes = (IsAuthenticated,)  
-    def get_serializer_context(self,request):
-      #pass request from to serializer here!
-      return {'user':request.user}
-
     def post(self, request, *args, **kwargs):
-      print('THIS IS USER')
       context = {"user":request.user}
       file_serializer = FileSerializer(data=request.data,context=context)
       if file_serializer.is_valid():
@@ -41,11 +33,3 @@ class FileUploadView(ListAPIView):
 
   
 
-
-class CreateUserView(CreateAPIView):
-    model = get_user_model()
-    permission_classes = [
-      permissions.AllowAny # Or anon users can't register
-    ]
-    serializer_class = UserSerializer
-    

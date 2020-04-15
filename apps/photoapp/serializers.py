@@ -70,6 +70,7 @@ class FileSerializer(serializers.ModelSerializer):
         path_now = os.path.abspath(image.name)
         path_from_move = os.path.dirname(path_now)+'/media/'+image.name
         self.move_to_user(path_from_move,need_path,image)
+        #TODO UPDATE PATH
         return photo
 
     class Meta:

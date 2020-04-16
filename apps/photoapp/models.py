@@ -15,7 +15,3 @@ class Photo(models.Model):
     image = models.ImageField()
     created_date = models.DateTimeField(auto_now_add=True)
     views = models.ManyToManyField(PhotoViews)
-
-
- 
-

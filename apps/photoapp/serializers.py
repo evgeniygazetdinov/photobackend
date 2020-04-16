@@ -7,18 +7,10 @@ from django.core.files.base import ContentFile
 from django.conf import settings
 import shutil
 from datetime import datetime, timedelta
-
-
-
-
-class CountViewsPhotoSerializer(serializers.ModelSerializer):
-    views = serializers.SerializerMethodField(method_name='get_list_views')
-    links = serializers.SerializerMethodField(method_name='get_unique_link_for_image') 
-    def get_list_views(self, obj):
-        pass
-    
-    def get_unique_link_for_image(self, obj):
-        pass
+from django.urls import reverse
+from django.utils.crypto import get_random_string
+import base64
+import uuid
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -26,15 +18,60 @@ class FileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
     user = serializers.SerializerMethodField(method_name='get_user')
     views = serializers.SerializerMethodField(method_name='display_views')
+    unique_link = serializers.SerializerMethodField(method_name='generate_link')
+    delete_by_unique_link = serializers.SerializerMethodField(method_name='generate_delete_link')
+
+    def encode_piece(self,ori_str, key):
+        enc = []
+        b = bytearray(ori_str)
+        k = bytearray(key)
+        for i, c in enumerate(b):
+            key_c = k[i % len(key)]
+            enc_c = (c + key_c) % 256
+            enc.append(enc_c)
+        return (base64.urlsafe_b64encode(bytes(bytearray(enc))))
+
+
+    @staticmethod
+    #call this stuff in view/for back id
+    def decode_id(enc_str, key):
+        dec = []
+        byte_key = bytes(key, 'utf-8')
+        enc_str = bytearray(base64.urlsafe_b64decode(enc_str))
+        k = bytearray(byte_key)
+        for i, c in enumerate(enc_str):
+            key_c = k[i % len(byte_key)]
+            dec_c = (c - key_c) % 256
+            dec.append(dec_c)
+        return (bytes(bytearray(dec)))#for barbara
+
+
+
+    def generate_link(self,obj):
+        randomstring = get_random_string()
+        key = (uuid.uuid4().hex.upper()[0:6]).encode('utf-8')
+        owner = self.encode_piece(str(self.context['user']).encode('utf-8'),key)
+        enc = self.encode_piece(str(obj.id).encode('utf-8'),key)
+        link = reverse('unique', kwargs={'random_string':randomstring,
+            'encript':enc.decode('utf-8'),'key':key.decode('utf-8'),
+            'owner':owner.decode('utf-8')})
+        return self.context['host']+link
+
+
+    #YES THIS REPEAT BUT i have not found flags. for methodfield for split one func
+    def generate_delete_link(self,obj):
+        randomstring = get_random_string()
+        key = uuid.uuid4().hex.upper()[0:6]
+        enc = self.encode_piece(str(obj.id).encode('utf-8'),key.encode('utf-8'))
+        link = reverse('delete_unique', kwargs={'random_string':randomstring,'encript':enc.decode('utf-8'),'key':key})
+        return self.context['host']+link
+
 
     def display_views(self,obj):
         res = []
-        
-        
         views = obj.views.all()
         for view in views:
             obj_time = view.views+timedelta(hours=3)
-            
             res.append(obj_time.strftime("%Y-%m-%d %H:%M"))
         return res
 
@@ -68,15 +105,9 @@ class FileSerializer(serializers.ModelSerializer):
 
 
 
-    def move_to_user(self,path_from_move,need_path,image):
-        pass
-
-
     def create(self,validated_data):
-        #TODO SAVE HERE
         image = validated_data.pop('image')
-        current_user = self.context['user']
-        request = self.context.get('request')
+        current_user = self.context['current_user_model']
         #need_path = (os.getcwd()+'/media/'+str(current_user.user.username)+'/')
         #path_now = os.path.abspath(image.name)
         #path_from_move = os.path.dirname(path_now)+'/media/'+image.name
@@ -94,4 +125,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user', 'created_date','views')
+        fields = ('id', 'image', 'user', 'created_date','views','unique_link','delete_by_unique_link')

@@ -15,7 +15,7 @@ UserModel = PhotoUser
 class UserSerializer(serializers.ModelSerializer):
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
-        serializer = FileSerializer(instance=photos, many=True)
+        serializer = FileSerializer(instance=photos, many=True,context=self.context)
         return serializer.data
 
 
@@ -24,6 +24,7 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     is_admin = serializers.CharField(source="user.is_staff",required=False)
     photos = serializers.SerializerMethodField(method_name='get_images')
+    
     def create(self, validated_data):
         user = PhotoUser.objects.create(
             user__username=validated_data['username']
@@ -40,8 +41,8 @@ class UserSerializer(serializers.ModelSerializer):
         return super(UserSerializer, self).update(instance, validated_data)
 
     class Meta:
-
         model = User
+    
         fields = ('id','username','is_admin','photos','password')
   
 

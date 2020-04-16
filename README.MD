@@ -2,14 +2,14 @@ BACKEND FOR PHOTOHOSTING WITH CUSTOM LOGIC
 
 **************************
 
->>>>>>> develop
+>>>>>>> 
 for shell
 
 ./manage.py shell_plus
 
 **************************
 
->>>>>>> develop
+>>>>>>> 
 for run 
 
 ./manage.py runserver

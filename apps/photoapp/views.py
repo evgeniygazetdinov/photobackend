@@ -18,7 +18,7 @@ class FileUploadView(ListAPIView):
     permission_classes = (IsAuthenticated,)  
     def post(self, request, *args, **kwargs):
         user = PhotoUser.objects.get(user__username = request.user)
-        context = {"user": user}
+        context = {'host' :(request.scheme +"://"+ request.get_host()),'user':request.user,'current_user_model':user}
         file_serializer = FileSerializer(data=request.data,context=context)
         if file_serializer.is_valid():
             file_serializer.save()

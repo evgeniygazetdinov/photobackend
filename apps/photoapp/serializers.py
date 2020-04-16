@@ -104,8 +104,7 @@ class FileSerializer(serializers.ModelSerializer):
 
     def create(self,validated_data):
         image = validated_data.pop('image')
-        current_user = self.context['user']
-        request = self.context.get('request')
+        current_user = self.context['current_user_model']
         #need_path = (os.getcwd()+'/media/'+str(current_user.user.username)+'/')
         #path_now = os.path.abspath(image.name)
         #path_from_move = os.path.dirname(path_now)+'/media/'+image.name

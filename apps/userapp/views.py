@@ -16,7 +16,7 @@ from .models import PhotoUser
 @permission_classes((IsAuthenticated, ))
 def check_user(request):
     cur_user = PhotoUser.objects.get(user__username=request.user)
-    context = {'host' :(request.scheme +"://"+ request.get_host())}
+    context = {'host' :(request.scheme +"://"+ request.get_host()),'user':request.user}
     serializer = UserSerializer(cur_user,context=context)
     return Response(serializer.data,status.HTTP_200_OK)
 

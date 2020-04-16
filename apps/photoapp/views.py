@@ -25,10 +25,6 @@ class FileUploadView(ListAPIView):
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
-    def get(self, request, format=None):
-        photo = Photo.objects.all()
-        serializer = FileSerializer(photo, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
 
 
 
@@ -64,7 +60,7 @@ def get_picture_from_unique_link(request,random_string,encript,key,owner):
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 
-@api_view(['POST'])
+@api_view(['DELETE'])
 @permission_classes((IsAuthenticated, ))
 def delete_picture_from_unique_link(request,random_string,encript,key):
     picture_id = FileSerializer.decode_id(encript,key)

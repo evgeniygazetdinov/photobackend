@@ -11,8 +11,6 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render_to_response, get_object_or_404
 from django.conf import settings
 import datetime
-from cryptography.fernet import Fernet
-import struct
 
 
 
@@ -56,17 +54,10 @@ def get_picture_by_id(request,picture_id):
 @permission_classes((IsAuthenticated, ))
 def unique_link(request,random_string,encript,key):
     byte_key = bytes(key, 'utf-8')
-    print(byte_key)
-    print(key)  
-    cipher_suite = Fernet(byte_key)
-    byte_id = bytes(encript, 'utf-8')
-    print(encript)
-    print(byte_id)
-    picture_id = cipher_suite.decrypt(byte_id)
+    picture_id = FileSerializer.decode_id(encript,byte_key)
     cur_user = PhotoUser.objects.get(user__username=request.user)
-    photo = Photo.objects.get(id = int(picture_id),user =cur_user)
+    photo = Photo.objects.get(id = int(picture_id.decode('utf-8')),user =cur_user)
     host = request.scheme +"://"+ request.get_host()
-    
     now = datetime.datetime.now()
     photo_view = PhotoViews()
     photo_view.save()

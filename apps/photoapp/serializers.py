@@ -9,9 +9,10 @@ import shutil
 from datetime import datetime, timedelta
 from django.urls import reverse
 from django.utils.crypto import get_random_string
+import base64
+import uuid
 from cryptography.fernet import Fernet
 import struct
-
 
 class CountViewsPhotoSerializer(serializers.ModelSerializer):
     views = serializers.SerializerMethodField(method_name='get_list_views')
@@ -30,14 +31,35 @@ class FileSerializer(serializers.ModelSerializer):
     views = serializers.SerializerMethodField(method_name='display_views')
     unique_links = serializers.SerializerMethodField(method_name='generate_link')
 
-    def generate_link(self,obj):
-        key = Fernet.generate_key()
-        cipher_suite = Fernet(key)
-        byte_id = struct.pack("B", obj.id)
-        cipher_text = cipher_suite.encrypt(b"%b"%byte_id)
+    def encode_id(self,ori_str, key):
+        enc = []
+        b = bytearray(ori_str)
+        k = bytearray(key)
+        for i, c in enumerate(b):
+            key_c = k[i % len(key)]
+            enc_c = (c + key_c) % 256
+            enc.append(enc_c)
+        return (base64.urlsafe_b64encode(bytes(bytearray(enc))))
 
-        randomstring = get_random_string(length=4)
-        link = reverse('unique', kwargs={'random_string':randomstring,'encript':cipher_text.decode("utf-8"),'key':key.decode("utf-8")})
+
+    @staticmethod
+    def decode_id(enc_str, key):
+        dec = []
+        enc_str = bytearray(base64.urlsafe_b64decode(enc_str))
+        k = bytearray(key)
+        for i, c in enumerate(enc_str):
+            key_c = k[i % len(key)]
+            dec_c = (c - key_c) % 256
+            dec.append(dec_c)
+        return bytes(bytearray(dec))
+
+
+
+    def generate_link(self,obj):
+        randomstring = get_random_string()
+        key = uuid.uuid4().hex.upper()[0:6]
+        enc = self.encode_id(str(obj.id).encode('utf-8'),key.encode('utf-8'))
+        link = reverse('unique', kwargs={'random_string':randomstring,'encript':enc.decode('utf-8'),'key':key})
         return 'http://127.0.0.1:8000'+link
 
 

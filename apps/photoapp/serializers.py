@@ -11,17 +11,6 @@ from django.urls import reverse
 from django.utils.crypto import get_random_string
 import base64
 import uuid
-from cryptography.fernet import Fernet
-import struct
-
-class CountViewsPhotoSerializer(serializers.ModelSerializer):
-    views = serializers.SerializerMethodField(method_name='get_list_views')
-    links = serializers.SerializerMethodField(method_name='get_unique_link_for_image') 
-    def get_list_views(self, obj):
-        pass
-    
-    def get_unique_link_for_image(self, obj):
-        pass
 
 
 class FileSerializer(serializers.ModelSerializer):
@@ -29,7 +18,8 @@ class FileSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
     user = serializers.SerializerMethodField(method_name='get_user')
     views = serializers.SerializerMethodField(method_name='display_views')
-    unique_links = serializers.SerializerMethodField(method_name='generate_link')
+    unique_link = serializers.SerializerMethodField(method_name='generate_link')
+    delete_by_unique_link = serializers.SerializerMethodField(method_name='generate_delete_link')
 
     def encode_id(self,ori_str, key):
         enc = []
@@ -43,15 +33,17 @@ class FileSerializer(serializers.ModelSerializer):
 
 
     @staticmethod
+    #call this stuff in view/for back id
     def decode_id(enc_str, key):
         dec = []
+        byte_key = bytes(key, 'utf-8')
         enc_str = bytearray(base64.urlsafe_b64decode(enc_str))
-        k = bytearray(key)
+        k = bytearray(byte_key)
         for i, c in enumerate(enc_str):
-            key_c = k[i % len(key)]
+            key_c = k[i % len(byte_key)]
             dec_c = (c - key_c) % 256
             dec.append(dec_c)
-        return bytes(bytearray(dec))
+        return int(bytes(bytearray(dec)).decode('utf-8'))#for barbara
 
 
 
@@ -60,8 +52,16 @@ class FileSerializer(serializers.ModelSerializer):
         key = uuid.uuid4().hex.upper()[0:6]
         enc = self.encode_id(str(obj.id).encode('utf-8'),key.encode('utf-8'))
         link = reverse('unique', kwargs={'random_string':randomstring,'encript':enc.decode('utf-8'),'key':key})
-        return 'http://127.0.0.1:8000'+link
+        return self.context['host']+link
 
+
+    #YES THIS REPEAT BUT i have not found flags. for methodfield for split one func
+    def generate_delete_link(self,obj):
+        randomstring = get_random_string()
+        key = uuid.uuid4().hex.upper()[0:6]
+        enc = self.encode_id(str(obj.id).encode('utf-8'),key.encode('utf-8'))
+        link = reverse('delete_unique', kwargs={'random_string':randomstring,'encript':enc.decode('utf-8'),'key':key})
+        return self.context['host']+link
 
 
     def display_views(self,obj):
@@ -101,12 +101,8 @@ class FileSerializer(serializers.ModelSerializer):
                     return data
 
 
-    def move_to_user(self,path_from_move,need_path,image):
-        pass
-
 
     def create(self,validated_data):
-        #TODO SAVE HERE
         image = validated_data.pop('image')
         current_user = self.context['user']
         request = self.context.get('request')
@@ -127,4 +123,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user', 'created_date','views','unique_links')
+        fields = ('id', 'image', 'user', 'created_date','views','unique_link','delete_by_unique_link')

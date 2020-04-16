@@ -15,7 +15,7 @@ UserModel = PhotoUser
 class UserSerializer(serializers.ModelSerializer):
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
-        serializer = FileSerializer(instance=photos, many=True)
+        serializer = FileSerializer(instance=photos, many=True,context=self.context)
         return serializer.data
 
 

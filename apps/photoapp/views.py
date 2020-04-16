@@ -2,7 +2,7 @@ from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework import status
 from .serializers import FileSerializer
-import json
+import os
 from .models import Photo,PhotoViews
 from rest_framework.permissions import IsAuthenticated  # <-- Here
 from userapp.models import PhotoUser
@@ -39,12 +39,10 @@ def get_picture_by_id(request,picture_id):
     cur_user = PhotoUser.objects.get(user__username=request.user)
     photo = Photo.objects.get(id = picture_id,user =cur_user)
     host = request.scheme +"://"+ request.get_host()
-    
     now = datetime.datetime.now()
     photo_view = PhotoViews()
     photo_view.save()
     photo.views.add(photo_view)
-    
     pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url}
     return render_to_response('photoapp/photo.html',pic_propenty)
 
@@ -52,11 +50,10 @@ def get_picture_by_id(request,picture_id):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
-def unique_link(request,random_string,encript,key):
-    byte_key = bytes(key, 'utf-8')
-    picture_id = FileSerializer.decode_id(encript,byte_key)
+def get_picture_from_unique_link(request,random_string,encript,key):
+    picture_id = FileSerializer.decode_id(encript,key)
     cur_user = PhotoUser.objects.get(user__username=request.user)
-    photo = Photo.objects.get(id = int(picture_id.decode('utf-8')),user =cur_user)
+    photo = Photo.objects.get(id = picture_id,user =cur_user)
     host = request.scheme +"://"+ request.get_host()
     now = datetime.datetime.now()
     photo_view = PhotoViews()
@@ -65,3 +62,14 @@ def unique_link(request,random_string,encript,key):
     pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url}
     return render_to_response('photoapp/photo.html',pic_propenty)
 
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def delete_picture_from_unique_link(request,random_string,encript,key):
+    picture_id = FileSerializer.decode_id(encript,key)
+    cur_user = PhotoUser.objects.get(user__username=request.user)
+    photo = Photo.objects.get(id = picture_id,user =cur_user)
+    photo.delete()
+    os.remove(photo.image.path)
+    pic_propenty = {'user':cur_user.user.username,'picture_url':photo.image.url +' was be removed','url':request.path}
+    return Response(pic_propenty, status=status.HTTP_200_OK)

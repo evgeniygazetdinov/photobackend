@@ -21,7 +21,7 @@ class FileSerializer(serializers.ModelSerializer):
     unique_link = serializers.SerializerMethodField(method_name='generate_link')
     delete_by_unique_link = serializers.SerializerMethodField(method_name='generate_delete_link')
 
-    def encode_id(self,ori_str, key):
+    def encode_piece(self,ori_str, key):
         enc = []
         b = bytearray(ori_str)
         k = bytearray(key)
@@ -43,15 +43,18 @@ class FileSerializer(serializers.ModelSerializer):
             key_c = k[i % len(byte_key)]
             dec_c = (c - key_c) % 256
             dec.append(dec_c)
-        return int(bytes(bytearray(dec)).decode('utf-8'))#for barbara
+        return (bytes(bytearray(dec)))#for barbara
 
 
 
     def generate_link(self,obj):
         randomstring = get_random_string()
-        key = uuid.uuid4().hex.upper()[0:6]
-        enc = self.encode_id(str(obj.id).encode('utf-8'),key.encode('utf-8'))
-        link = reverse('unique', kwargs={'random_string':randomstring,'encript':enc.decode('utf-8'),'key':key})
+        key = (uuid.uuid4().hex.upper()[0:6]).encode('utf-8')
+        owner = self.encode_piece(str(self.context['user']).encode('utf-8'),key)
+        enc = self.encode_piece(str(obj.id).encode('utf-8'),key)
+        link = reverse('unique', kwargs={'random_string':randomstring,
+            'encript':enc.decode('utf-8'),'key':key.decode('utf-8'),
+            'owner':owner.decode('utf-8')})
         return self.context['host']+link
 
 
@@ -59,7 +62,7 @@ class FileSerializer(serializers.ModelSerializer):
     def generate_delete_link(self,obj):
         randomstring = get_random_string()
         key = uuid.uuid4().hex.upper()[0:6]
-        enc = self.encode_id(str(obj.id).encode('utf-8'),key.encode('utf-8'))
+        enc = self.encode_piece(str(obj.id).encode('utf-8'),key.encode('utf-8'))
         link = reverse('delete_unique', kwargs={'random_string':randomstring,'encript':enc.decode('utf-8'),'key':key})
         return self.context['host']+link
 

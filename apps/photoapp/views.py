@@ -50,10 +50,11 @@ def get_picture_by_id(request,picture_id):
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
-def get_picture_from_unique_link(request,random_string,encript,key):
-    picture_id = FileSerializer.decode_id(encript,key)
-    cur_user = PhotoUser.objects.get(user__username=request.user)
-    photo = Photo.objects.get(id = picture_id,user =cur_user)
+def get_picture_from_unique_link(request,random_string,encript,key,owner):
+    picture_id = (FileSerializer.decode_id(encript,key))
+    owner_from_uri = (FileSerializer.decode_id(owner,key)).decode('utf-8')
+    cur_user = PhotoUser.objects.get(user__username=owner_from_uri)
+    photo = Photo.objects.get(id = int(picture_id),user =cur_user)
     host = request.scheme +"://"+ request.get_host()
     now = datetime.datetime.now()
     photo_view = PhotoViews()

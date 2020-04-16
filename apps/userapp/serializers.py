@@ -15,7 +15,7 @@ UserModel = PhotoUser
 class UserSerializer(serializers.ModelSerializer):
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
-        serializer = FileSerializer(instance=photos, many=True)
+        serializer = FileSerializer(instance=photos, many=True,context=self.context)
         return serializer.data
 
 
@@ -24,14 +24,16 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     is_admin = serializers.CharField(source="user.is_staff",required=False)
     photos = serializers.SerializerMethodField(method_name='get_images')
-    def create(self, validated_data):
-        user = PhotoUser.objects.create(
-            user__username=validated_data['username']
-        )
-        user.set_password(validated_data['password'])
-        user.save()
+  
 
-        return user
+    def create(self, validated_data):
+        user = User.objects.create(
+            username=validated_data['user']['username']
+        )
+        user.set_password(validated_data['user']['password'])
+        user.save()
+        photo= PhotoUser(user=user)
+        return photo
     
     def update(self, instance, validated_data):
         if 'password' in validated_data:
@@ -39,8 +41,14 @@ class UserSerializer(serializers.ModelSerializer):
             instance.set_password(password)
         return super(UserSerializer, self).update(instance, validated_data)
 
-    class Meta:
+        
+    def validate(self,data):
+        is_already_exists = User.objects.filter(username=data['user']['username']).exists()
+        if is_already_exists:
+            raise serializers.ValidationError('already exists')
+        return data
 
+    class Meta:
         model = User
         fields = ('id','username','is_admin','photos','password')
   

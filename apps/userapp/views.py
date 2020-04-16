@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from django.contrib.auth.models import User # If used custom user model
 from .serializers import UserSerializer, ChangePasswordSerializer
 from rest_framework import permissions
-from rest_framework.permissions import IsAuthenticated, IsAdminUser  # 
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny  # 
 from rest_framework import status
 from rest_framework import generics
 from rest_framework.response import Response
@@ -16,16 +16,22 @@ from .models import PhotoUser
 @permission_classes((IsAuthenticated, ))
 def check_user(request):
     cur_user = PhotoUser.objects.get(user__username=request.user)
-    serializer = UserSerializer(cur_user)
+    context = {'host' :(request.scheme +"://"+ request.get_host()),'user':request.user}
+    serializer = UserSerializer(cur_user,context=context)
     return Response(serializer.data,status.HTTP_200_OK)
 
-class CreateUserView(CreateAPIView):
+class CreateUserView(generics.ListCreateAPIView):
+    permission_classes = (AllowAny,)
     model = PhotoUser
-    permission_classes = [
-      permissions.AllowAny # Or anon users can't register
-    ]
     serializer_class = UserSerializer
 
+    def post(self, request, format=None):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class AllUserView(ListAPIView):
     permission_classes = (IsAdminUser,)

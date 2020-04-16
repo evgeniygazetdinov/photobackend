@@ -1,0 +1,10 @@
+db.sqlite3
+/photoapp/__pycache__/*
+/userapp/__pycache__/*
+/userapp/migrations/*.pyc
+/photoapp/migrations/*.pyc
+/photobackend/__pycache__/*
+*.pyc
+*.jpeg
+*.jpg
+media/*

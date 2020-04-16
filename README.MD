@@ -15,6 +15,12 @@ for run
 ./manage.py runserver
 
 **************************
+
+if first-run do migrate
+
+./manage.py migrate
+
+**************************
 **************************
 
 urls:

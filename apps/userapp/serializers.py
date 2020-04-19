@@ -23,8 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(source='user.password',write_only=True)
     username = serializers.CharField(source="user.username")
     is_admin = serializers.CharField(source="user.is_staff",required=False)
-    photos = serializers.SerializerMethodField(method_name='get_images')
-  
+    photos = serializers.SerializerMethodField(method_name='get_images') 
 
     def create(self, validated_data):
         user = User.objects.create(
@@ -40,6 +39,7 @@ class UserSerializer(serializers.ModelSerializer):
             password = validated_data.pop('password')
             instance.set_password(password)
         return super(UserSerializer, self).update(instance, validated_data)
+
 
         
     def validate(self,data):

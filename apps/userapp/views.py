@@ -20,6 +20,19 @@ def check_user(request):
     serializer = UserSerializer(cur_user,context=context)
     return Response(serializer.data,status.HTTP_200_OK)
 
+
+
+@api_view(['GET'])
+@permission_classes((permissions.AllowAny, ))
+def exists_user(request,username):
+    user_exists = PhotoUser.objects.filter(user__username=username).exists()
+    response = {}
+    if user_exists:
+        return Response({'username':'exists'},status.HTTP_200_OK)
+    return Response({'username':'not exists'}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
 class CreateUserView(generics.ListCreateAPIView):
     permission_classes = (AllowAny,)
     model = PhotoUser
@@ -32,6 +45,7 @@ class CreateUserView(generics.ListCreateAPIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+          
 
 class AllUserView(ListAPIView):
     permission_classes = (IsAdminUser,)
@@ -87,3 +101,6 @@ def delete_user(request, user_id):
                 'message': 'user with id: {} deleted'.format(user_id),
             }
     return Response(response,status.HTTP_200_OK)
+  
+  
+  

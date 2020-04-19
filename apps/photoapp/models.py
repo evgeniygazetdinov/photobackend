@@ -6,6 +6,7 @@ from django.conf import settings
 import uuid
 
 
+
 class PhotoViews(models.Model):
     views = models.DateTimeField(auto_now_add=True)
 
@@ -15,3 +16,4 @@ class Photo(models.Model):
     image = models.ImageField()
     created_date = models.DateTimeField(auto_now_add=True)
     views = models.ManyToManyField(PhotoViews)
+

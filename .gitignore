@@ -1,5 +1,9 @@
 db.sqlite3
-/*/__pycache__/
+/photoapp/__pycache__/*
+/userapp/__pycache__/*
+/userapp/migrations/*.pyc
+/photoapp/migrations/*.pyc
+/photobackend/__pycache__/*
 *.pyc
 *.jpeg
 *.jpg

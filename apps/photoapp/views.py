@@ -24,13 +24,7 @@ class FileUploadView(ListAPIView):
             file_serializer.save()
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def get(self, request, format=None):
-        photo = Photo.objects.all()
-        serializer = FileSerializer(photo, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-
+   
 
 
 @api_view(['GET'])
@@ -64,6 +58,7 @@ def get_picture_from_unique_link(request,random_string,encript,key,owner):
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 
+
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def delete_picture_from_unique_link(request,random_string,encript,key):
@@ -74,3 +69,4 @@ def delete_picture_from_unique_link(request,random_string,encript,key):
     os.remove(photo.image.path)
     pic_propenty = {'user':cur_user.user.username,'picture_url':photo.image.url +' was be removed','url':request.path}
     return Response(pic_propenty, status=status.HTTP_200_OK)
+

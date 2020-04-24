@@ -59,7 +59,7 @@ def get_picture_from_unique_link(request,random_string,encript,key,owner):
 
 
 
-@api_view(['POST'])
+@api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
 def delete_picture_from_unique_link(request,random_string,encript,key):
     picture_id = FileSerializer.decode_id(encript,key)

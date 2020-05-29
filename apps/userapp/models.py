@@ -10,6 +10,7 @@ from photoapp.models import Photo
 class PhotoUser(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     image =  models.ManyToManyField('photoapp.photo')
+    time_for_clear_messages = models.IntegerField(default=60)
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

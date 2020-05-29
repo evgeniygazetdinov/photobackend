@@ -2,7 +2,7 @@ from rest_framework import permissions
 from rest_framework.generics import CreateAPIView, ListAPIView, UpdateAPIView
 from rest_framework.views import APIView
 from django.contrib.auth.models import User # If used custom user model
-from .serializers import UserSerializer, ChangePasswordSerializer
+from .serializers import UserSerializer, ChangePasswordSerializer, ChangeTimeDeleteSerializer
 from rest_framework import permissions
 from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny  # 
 from rest_framework import status
@@ -51,6 +51,37 @@ class AllUserView(ListAPIView):
     permission_classes = (IsAdminUser,)
     serializer_class = UserSerializer
     queryset = PhotoUser.objects.all()
+
+
+
+class ChangeTimeDeleteView(UpdateAPIView):
+    serializer_class = ChangeTimeDeleteSerializer
+    model = PhotoUser
+    permission_classes = (IsAuthenticated,)
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        print(request.data)
+        if serializer.is_valid():
+            # set_password also hashes the password that the user will get
+            #self.object(serializer.data.get("new_time"))
+            self.object.photouser.time_for_clear_messages = serializer.data.get("new_time")
+            self.object.save()
+            response = {
+                'status': 'success',
+                'code': status.HTTP_200_OK,
+                'current_time': self.object.photouser.time_for_clear_messages,
+                'message': 'time updated successfully',
+            }
+
+            return Response(response)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class ChangePasswordView(UpdateAPIView):

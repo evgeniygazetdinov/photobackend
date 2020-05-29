@@ -13,6 +13,30 @@ UserModel = PhotoUser
 
 
 class UserSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        user = User.objects.create(
+        username=validated_data['user']['username'])
+        user.set_password(validated_data['user']['password'])
+        user.save()
+        photo= PhotoUser(user=user)
+        return photo
+    
+
+    def update(self, instance, validated_data):
+        if 'password' in validated_data:
+            password = validated_data.pop('password')
+            instance.set_password(password)
+        return super(UserSerializer, self).update(instance, validated_data)
+
+
+    def validate(self,data):
+        is_already_exists = User.objects.filter(username=data['user']['username']).exists()
+        if is_already_exists:
+            raise serializers.ValidationError('already exists')
+        return data
+
+
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
         serializer = FileSerializer(instance=photos, many=True,context=self.context)
@@ -30,29 +54,6 @@ class UserSerializer(serializers.ModelSerializer):
     time_for_clear_messages = serializers.SerializerMethodField(method_name='user_time_for_clear')
     photos = serializers.SerializerMethodField(method_name='get_images') 
 
-    def create(self, validated_data):
-        user = User.objects.create(
-            username=validated_data['user']['username']
-        )
-        user.set_password(validated_data['user']['password'])
-        user.save()
-        photo= PhotoUser(user=user)
-        return photo
-    
-    def update(self, instance, validated_data):
-        if 'password' in validated_data:
-            password = validated_data.pop('password')
-            instance.set_password(password)
-        return super(UserSerializer, self).update(instance, validated_data)
-
-
-        
-    def validate(self,data):
-        is_already_exists = User.objects.filter(username=data['user']['username']).exists()
-        if is_already_exists:
-            raise serializers.ValidationError('already exists')
-        return data
-
     class Meta:
         model = User
         fields = ('id','username','is_admin','time_for_clear_messages','photos','password')
@@ -65,3 +66,7 @@ class ChangePasswordSerializer(serializers.Serializer):
     def validate_new_password(self, value):
         validate_password(value)
         return value
+
+
+class ChangeTimeDeleteSerializer(serializers.Serializer):
+    new_time = serializers.CharField(required=True)

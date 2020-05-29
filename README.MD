@@ -65,7 +65,12 @@ send new_password,old_password in body;
 
 you must be authorized
 
+**************************
+update_delete_time/|PUT
 
+send new_time
+
+you must be authorized
 
 
 =======
@@ -115,5 +120,4 @@ user must be authorized,posible not owner
 delete_picture/<str:random_string>/<str:encript>/<str:key>/ |POST
 
 user must be authorized as owner
-=======
 

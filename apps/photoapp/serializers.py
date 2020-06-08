@@ -1,6 +1,7 @@
 from rest_framework import serializers
-from .models import Photo
+from .models import Photo,PhotoPosition
 from userapp.models import PhotoUser
+
 import os
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -13,6 +14,27 @@ import base64
 import uuid
 
 
+class PositionSerializer(serializers.ModelSerializer):
+    def get_id(self,obj):
+
+        return obj.id
+
+
+    def get_latitude(self,obj):
+        return 1
+    
+    
+    def get_longtude(self,obj):
+        return 1    
+
+
+    id = serializers.SerializerMethodField(method_name='get_id')
+    longitude = serializers.SerializerMethodField(method_name='get_latitude')
+    latitude  = serializers.SerializerMethodField(method_name='get_longtude')
+
+
+
+
 class FileSerializer(serializers.ModelSerializer):
     created_date = serializers.SerializerMethodField(method_name='time_format')
     id = serializers.IntegerField(required=False)
@@ -20,6 +42,8 @@ class FileSerializer(serializers.ModelSerializer):
     views = serializers.SerializerMethodField(method_name='display_views')
     unique_link = serializers.SerializerMethodField(method_name='generate_link')
     delete_by_unique_link = serializers.SerializerMethodField(method_name='generate_delete_link')
+    position = serializers.SerializerMethodField(method_name='get_photo_position')
+
 
     def encode_piece(self,ori_str, key):
         enc = []
@@ -86,6 +110,13 @@ class FileSerializer(serializers.ModelSerializer):
         obj_time = obj.created_date+timedelta(hours=3)
         return  obj_time.strftime("%Y-%m-%d %H:%M")
 
+    def get_photo_position(self,obj):
+        #serializer = 
+        pos = PhotoPosition.objects.get(id=obj.id)
+        photo_position = {'longitude':pos.longitude,'latitude':pos.latitude}
+
+        return photo_position
+
 
     def get_user(self,obj):
         #iterate thoght photouser
@@ -125,4 +156,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user', 'created_date','views','unique_link','delete_by_unique_link')
+        fields = ('id', 'image', 'user', 'created_date','views','unique_link','delete_by_unique_link','position')

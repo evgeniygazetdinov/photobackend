@@ -2,17 +2,31 @@ BACKEND FOR PHOTOHOSTING WITH CUSTOM LOGIC
 
 **************************
 
+
+=======
+
 for shell
 
 ./manage.py shell_plus
 
 **************************
 
+=======
+
 for run 
 
 ./manage.py runserver
 
 **************************
+
+=======
+
+if first-run do migrate
+
+./manage.py migrate
+
+**************************
+
 **************************
 
 urls:
@@ -21,6 +35,9 @@ urls:
 users
 **************************
 
+
+
+=======
 
 **************************
 create/ |POST
@@ -36,7 +53,10 @@ check_current/ GET
 
 you must be authorized
 
+**************************
+exists/<username> GET
 
+you must be authorized
 
 **************************
 update/|PUT
@@ -45,7 +65,15 @@ send new_password,old_password in body;
 
 you must be authorized
 
+**************************
+update_delete_time/|PUT
 
+send new_time
+
+you must be authorized
+
+
+=======
 
 **************************
 all/ |GET
@@ -58,6 +86,9 @@ you must be authorized as admin
 delete_user/<pk> |PUT
 
 you must be authorized as admin
+
+
+=======
 
 **************************
 
@@ -89,3 +120,4 @@ user must be authorized,posible not owner
 delete_picture/<str:random_string>/<str:encript>/<str:key>/ |POST
 
 user must be authorized as owner
+

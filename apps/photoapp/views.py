@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework import status
-from .serializers import FileSerializer
+from .serializers import FileSerializer,PositionSerializer
 import os
 from .models import Photo,PhotoViews
 from rest_framework.permissions import IsAuthenticated  # <-- Here
@@ -24,14 +24,19 @@ class FileUploadView(ListAPIView):
             file_serializer.save()
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-    def get(self, request, format=None):
-        photo = Photo.objects.all()
-        serializer = FileSerializer(photo, many=True)
-        return Response(data=serializer.data, status=status.HTTP_200_OK)
-
-
-
+   
+class ChangePhotoPositionView(ListAPIView):
+    permission_classes = (IsAuthenticated,)  
+    def post(self, request, *args, **kwargs):
+        return Response('war', status=status.HTTP_400_BAD_REQUEST)
+        # # photo_id = Photo.objects.get(image=request.data['image'])
+        # # photoposition = PhotoPosition.objects.get(id=photo_id)
+        # # pos_serializer = PhotoPositionSerializer(data=request.data,context=context)
+        # # if pos_serializer.is_valid():
+        # #     pos_serializer.save()
+        # #     return Response(pos.data, status=status.HTTP_200_OK)
+        # 
+   
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
@@ -64,7 +69,8 @@ def get_picture_from_unique_link(request,random_string,encript,key,owner):
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 
-@api_view(['POST'])
+
+@api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
 def delete_picture_from_unique_link(request,random_string,encript,key):
     picture_id = FileSerializer.decode_id(encript,key)
@@ -74,3 +80,4 @@ def delete_picture_from_unique_link(request,random_string,encript,key):
     os.remove(photo.image.path)
     pic_propenty = {'user':cur_user.user.username,'picture_url':photo.image.url +' was be removed','url':request.path}
     return Response(pic_propenty, status=status.HTTP_200_OK)
+

@@ -97,6 +97,12 @@ you must be authorized as admin
 photo/
 **************************
 
+
+change_photoposition/ |POST
+
+you must authorized send picture name as/ image /latitude in decimal/longitude in decinamal in body 
+
+**************************
 upload/ |POST
 
 you must authorized send pic in body

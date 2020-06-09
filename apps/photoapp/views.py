@@ -3,7 +3,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework import status
 from .serializers import FileSerializer,PositionSerializer
 import os
-from .models import Photo,PhotoViews
+from .models import Photo,PhotoViews,PhotoPosition
 from rest_framework.permissions import IsAuthenticated  # <-- Here
 from userapp.models import PhotoUser
 from rest_framework.decorators import api_view,permission_classes,action
@@ -26,16 +26,31 @@ class FileUploadView(ListAPIView):
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
    
 class ChangePhotoPositionView(ListAPIView):
-    permission_classes = (IsAuthenticated,)  
+    permission_classes = (IsAuthenticated,)
+    def find_id(self,request):
+        photo_name = request.data['image']
+        all_images = Photo.objects.all()
+        for image in all_images.values():
+            if photo_name == image['image']:
+                return image
+            else :
+                continue
+        return None            
+
+
     def post(self, request, *args, **kwargs):
-        return Response('war', status=status.HTTP_400_BAD_REQUEST)
-        # # photo_id = Photo.objects.get(image=request.data['image'])
-        # # photoposition = PhotoPosition.objects.get(id=photo_id)
-        # # pos_serializer = PhotoPositionSerializer(data=request.data,context=context)
-        # # if pos_serializer.is_valid():
-        # #     pos_serializer.save()
-        # #     return Response(pos.data, status=status.HTTP_200_OK)
-        # 
+        photo_instance = self.find_id(request)
+        if photo_instance:
+            position = PhotoPosition.objects.get(id=photo_instance['id'])
+            longitude = request.data['longitude']
+            latitude = request.data['latitude']
+            position.latitude = latitude
+            position.longitude = longitude
+            position.save()
+            return Response({'id':photo_instance['id'],'file':request.data['image'],'longitude':position.longitude ,'latitude':position.latitude}, status=status.HTTP_200_OK)
+        else:
+          
+           return Response({'error':'file {} not exists'.format(request.data['image'])}, status=status.HTTP_400_BAD_REQUEST)
    
 
 @api_view(['GET'])

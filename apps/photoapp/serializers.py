@@ -111,9 +111,8 @@ class FileSerializer(serializers.ModelSerializer):
         return  obj_time.strftime("%Y-%m-%d %H:%M")
 
     def get_photo_position(self,obj):
-        #serializer = 
-        pos = PhotoPosition.objects.get(id=obj.id)
-        photo_position = {'longitude':pos.longitude,'latitude':pos.latitude}
+        pos = PhotoPosition.objects.get_or_create(id=obj.id)
+        photo_position = {'id':pos[0].id,'longitude':pos[0].longitude,'latitude':pos[0].latitude}
 
         return photo_position
 

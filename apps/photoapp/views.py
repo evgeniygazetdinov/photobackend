@@ -63,7 +63,11 @@ def get_picture_by_id(request,picture_id):
     photo_view = PhotoViews()
     photo_view.save()
     photo.views.add(photo_view)
-    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url}
+    pos = PhotoPosition.objects.get_or_create(id=picture_id)
+    # if pos[0].longitude or pos[0].latitude == 0.0:
+    #     pos_on_map = 'отсутствует'
+    pos_on_map = 'https://www.google.com/maps/@{},{}'.format(pos[0].longitude,pos[0].latitude)
+    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url,'geopostion':pos_on_map}
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 
@@ -80,7 +84,12 @@ def get_picture_from_unique_link(request,random_string,encript,key,owner):
     photo_view = PhotoViews()
     photo_view.save()
     photo.views.add(photo_view)
-    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url}
+    pos = PhotoPosition.objects.get_or_create(id=picture_id)
+    if pos[0].longitude ==0.0 or pos[0].latitude == 0.0:
+        pos_on_map = False
+    else:
+        pos_on_map = 'https://www.google.com/maps/place/{},{}'.format(pos[0].latitude,pos[0].longitude)
+    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url,'geopostion':pos_on_map}
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 

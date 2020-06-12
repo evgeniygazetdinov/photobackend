@@ -72,8 +72,8 @@ class FileSerializer(serializers.ModelSerializer):
 
 
     def generate_link(self,obj):
-        randomstring = get_random_string()
-        key = (uuid.uuid4().hex.upper()[0:6]).encode('utf-8')
+        randomstring = get_random_string(length=2)
+        key = (uuid.uuid4().hex.upper()[0:2]).encode('utf-8')
         owner = self.encode_piece(str(self.context['user']).encode('utf-8'),key)
         enc = self.encode_piece(str(obj.id).encode('utf-8'),key)
         link = reverse('unique', kwargs={'random_string':randomstring,

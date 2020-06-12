@@ -1,4 +1,12 @@
 
 {% block content %}
 <img src="{{host}}{{picture_url}}" alt="{{picture_url}}" />
+<div class="map">
+геопозиция
+{% if geopostion %}
+<a href="{{geopostion}}" target="_blank">ссылка на геопозицию</a>
+
+   {%else%}
+отсутствует
+{%endif%}
 {% endblock %}

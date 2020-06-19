@@ -66,7 +66,7 @@ def change_photo_description(request):
     if photo_instance:
         desc = request.data['description']
         photo_instance.description = desc
-        print(photo_instance)
+
         photo_instance.save()
         return Response({'description':desc,'file':request.data['image']}, status=status.HTTP_200_OK)
     else:
@@ -106,15 +106,19 @@ def get_picture_from_unique_link(request,random_string,encript,key,owner):
     photo = Photo.objects.get(id = int(picture_id),user =cur_user)
     host = request.scheme +"://"+ request.get_host()
     now = datetime.datetime.now()
+    desc = photo.description
     photo_view = PhotoViews()
     photo_view.save()
     photo.views.add(photo_view)
     pos = PhotoPosition.objects.get_or_create(id=picture_id)
+    if photo.description is "null":
+        desc = False
+
     if pos[0].longitude ==0.0 or pos[0].latitude == 0.0:
         pos_on_map = False
     else:
         pos_on_map = 'https://www.google.com/maps/place/{},{}'.format(pos[0].latitude,pos[0].longitude)
-    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url,'geopostion':pos_on_map}
+    pic_propenty = {'host':host,'user':cur_user.user.username,'picture_url':photo.image.url,'geopostion':pos_on_map,'desc':desc}
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 

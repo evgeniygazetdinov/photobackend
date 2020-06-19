@@ -9,4 +9,10 @@
    {%else%}
 отсутствует
 {%endif%}
+Описание
+{% if desc %}
+   {{desc}}
+   {%else%}
+   отсутствует
+   {%endif%}
 {% endblock %}

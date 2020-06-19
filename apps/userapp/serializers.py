@@ -41,6 +41,10 @@ class UserSerializer(serializers.ModelSerializer):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
         serializer = FileSerializer(instance=photos, many=True,context=self.context)
         return serializer.data
+    
+    def user_last_visit(self,obj):
+        visit = UserModel.objects.get(id = obj.user.id)
+        return visit.last_visit
 
     def user_time_for_clear(self,obj):
         time = UserModel.objects.get(id = obj.user.id)
@@ -52,11 +56,12 @@ class UserSerializer(serializers.ModelSerializer):
     username = serializers.CharField(source="user.username")
     is_admin = serializers.CharField(source="user.is_staff",required=False)
     time_for_clear_messages = serializers.SerializerMethodField(method_name='user_time_for_clear')
+    last_visit = serializers.SerializerMethodField(method_name='user_last_visit')
     photos = serializers.SerializerMethodField(method_name='get_images') 
 
     class Meta:
         model = User
-        fields = ('id','username','is_admin','time_for_clear_messages','photos','password')
+        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','password')
   
 
 class ChangePasswordSerializer(serializers.Serializer):

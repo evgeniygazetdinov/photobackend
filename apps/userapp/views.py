@@ -10,6 +10,10 @@ from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.decorators import api_view,permission_classes,action
 from .models import PhotoUser
+from datetime import datetime
+
+from django.utils import timezone, dateformat
+
 
 
 @api_view(['GET'])
@@ -17,6 +21,9 @@ from .models import PhotoUser
 def check_user(request):
     cur_user = PhotoUser.objects.get(user__username=request.user)
     context = {'host' :(request.scheme +"://"+ request.get_host()),'user':request.user}
+    formatted_date = dateformat.format(timezone.now(), 'Y-m-d')
+    cur_user.last_visit=formatted_date
+    cur_user.save()
     serializer = UserSerializer(cur_user,context=context)
     return Response(serializer.data,status.HTTP_200_OK)
 

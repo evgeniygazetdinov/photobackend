@@ -24,34 +24,59 @@ class FileUploadView(ListAPIView):
             file_serializer.save()
             return Response(file_serializer.data, status=status.HTTP_201_CREATED)
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-   
-class ChangePhotoPositionView(ListAPIView):
-    permission_classes = (IsAuthenticated,)
-    def find_id(self,request):
-        photo_name = request.data['image']
-        all_images = Photo.objects.all()
-        for image in all_images.values():
-            if photo_name == image['image']:
-                return image
-            else :
-                continue
-        return None            
 
 
-    def post(self, request, *args, **kwargs):
-        photo_instance = self.find_id(request)
-        if photo_instance:
-            position = PhotoPosition.objects.get(id=photo_instance['id'])
-            longitude = request.data['longitude']
-            latitude = request.data['latitude']
-            position.latitude = latitude
-            position.longitude = longitude
-            position.save()
-            return Response({'id':photo_instance['id'],'file':request.data['image'],'longitude':position.longitude ,'latitude':position.latitude}, status=status.HTTP_200_OK)
-        else:
-          
-           return Response({'error':'file {} not exists'.format(request.data['image'])}, status=status.HTTP_400_BAD_REQUEST)
-   
+
+
+
+
+def find_id(request):
+    photo_name = request.data['image']
+    all_images = Photo.objects.all()
+    for image in all_images.values():
+        if photo_name == image['image']:
+            return image
+        else :
+            continue
+    return None        
+       
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def change_photoposition(request):
+    photo_instance = find_id(request)
+    if photo_instance:
+        position = PhotoPosition.objects.get(id=photo_instance['id'])
+        longitude = request.data['longitude']
+        latitude = request.data['latitude']
+        position.latitude = latitude
+        position.longitude = longitude
+        position.save()
+        return Response({'id':photo_instance['id'],'file':request.data['image'],'longitude':position.longitude ,'latitude':position.latitude}, status=status.HTTP_200_OK)
+    else:
+        
+        return Response({'error':'file {} not exists'.format(request.data['image'])}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def change_photo_description(request):
+    photo_instance = find_id(request)
+    photo_instance = Photo.objects.get(image = (photo_instance['image']))
+    if photo_instance:
+        desc = request.data['description']
+        photo_instance.description = desc
+        print(photo_instance)
+        photo_instance.save()
+        return Response({'description':desc,'file':request.data['image']}, status=status.HTTP_200_OK)
+    else:
+    
+        return Response({'error':'file {} not exists'.format(request.data['image'])}, status=status.HTTP_400_BAD_REQUEST)
+
+
+
+
+
 
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))

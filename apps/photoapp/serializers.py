@@ -43,6 +43,7 @@ class FileSerializer(serializers.ModelSerializer):
     unique_link = serializers.SerializerMethodField(method_name='generate_link')
     delete_by_unique_link = serializers.SerializerMethodField(method_name='generate_delete_link')
     position = serializers.SerializerMethodField(method_name='get_photo_position')
+    descript = serializers.SerializerMethodField(method_name='get_descript')
 
 
     def encode_piece(self,ori_str, key):
@@ -116,6 +117,9 @@ class FileSerializer(serializers.ModelSerializer):
 
         return photo_position
 
+    def get_descript(self,obj):
+        return obj.description
+
 
     def get_user(self,obj):
         #iterate thoght photouser
@@ -155,4 +159,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user', 'created_date','views','unique_link','delete_by_unique_link','position')
+        fields = ('id', 'image', 'user','descript', 'created_date','views','unique_link','delete_by_unique_link','position')

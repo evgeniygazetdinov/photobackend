@@ -41,6 +41,7 @@ class FileSerializer(serializers.ModelSerializer):
     user = serializers.SerializerMethodField(method_name='get_user')
     views = serializers.SerializerMethodField(method_name='display_views')
     unique_link = serializers.SerializerMethodField(method_name='generate_link')
+    unique_short_link = serializers.SerializerMethodField(method_name='generate_short_link')
     delete_by_unique_link = serializers.SerializerMethodField(method_name='generate_delete_link')
     position = serializers.SerializerMethodField(method_name='get_photo_position')
     descript = serializers.SerializerMethodField(method_name='get_descript')
@@ -57,6 +58,8 @@ class FileSerializer(serializers.ModelSerializer):
         return (base64.urlsafe_b64encode(bytes(bytearray(enc))))
 
 
+
+
     @staticmethod
     #call this stuff in view/for back id
     def decode_id(enc_str, key):
@@ -69,12 +72,31 @@ class FileSerializer(serializers.ModelSerializer):
             dec_c = (c - key_c) % 256
             dec.append(dec_c)
         return (bytes(bytearray(dec)))#for barbara
+    
+    
+    @staticmethod
+    def key_and_id_from_short_link(generated_string):
+        from_string = generated_string.split('&')
+        key = from_string[1]
+        decripted = (FileSerializer.decode_id(from_string[0],key))
+        from_decripted = (decripted.decode('utf-8')).split('#')
+        picture_id = FileSerializer.decode_id(from_decripted[1],key)
+        return int(picture_id)
 
+
+
+    def generate_short_link(self,obj):
+        key = (uuid.uuid4().hex.upper()[0:1]).encode('utf-8')
+        enc = self.encode_piece(str(obj.id).encode('utf-8'),key)
+        unique_random =key.decode('utf-8')+'#'+enc.decode('utf-8')
+        encode_unique_random =self.encode_piece(unique_random.encode('utf-8'),key)
+        link = reverse('short_unique', kwargs={'generated_string':str(encode_unique_random.decode('utf-8')+'&'+key.decode('utf-8'))})
+        return self.context['host']+link
 
 
     def generate_link(self,obj):
-        randomstring = get_random_string(length=2)
-        key = (uuid.uuid4().hex.upper()[0:2]).encode('utf-8')
+        randomstring = get_random_string(length=1)
+        key = (uuid.uuid4().hex.upper()[0:1]).encode('utf-8')
         owner = self.encode_piece(str(self.context['user']).encode('utf-8'),key)
         enc = self.encode_piece(str(obj.id).encode('utf-8'),key)
         link = reverse('unique', kwargs={'random_string':randomstring,
@@ -159,4 +181,4 @@ class FileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Photo
-        fields = ('id', 'image', 'user','descript', 'created_date','views','unique_link','delete_by_unique_link','position')
+        fields = ('id', 'image', 'user','descript', 'created_date','views','unique_link', 'unique_short_link', 'delete_by_unique_link','position')

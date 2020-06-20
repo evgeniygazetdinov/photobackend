@@ -75,6 +75,26 @@ def change_photo_description(request):
 
 
 
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
+def by_short_link(request,generated_string):
+    #LAST IS KEY FIRST IS ID
+    picture_id = FileSerializer.key_and_id_from_short_link(generated_string)
+    photo = Photo.objects.get(id = int(picture_id))
+    host = request.scheme +"://"+ request.get_host()
+    desc = photo.description
+    photo_view = PhotoViews()
+    photo_view.save()
+    photo.views.add(photo_view)
+    pos = PhotoPosition.objects.get_or_create(id=picture_id)
+    if photo.description is "null":
+        desc = False
+    if pos[0].longitude ==0.0 or pos[0].latitude == 0.0:
+        pos_on_map = False
+    else:
+        pos_on_map = 'https://www.google.com/maps/place/{},{}'.format(pos[0].latitude,pos[0].longitude)
+    pic_propenty = {'host':host,'picture_url':photo.image.url,'geopostion':pos_on_map,'desc':desc}
+    return render_to_response('photoapp/photo.html',pic_propenty)
 
 
 

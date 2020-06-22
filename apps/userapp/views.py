@@ -20,7 +20,7 @@ from django.utils import timezone, dateformat
 @permission_classes((IsAuthenticated, ))
 def check_user(request):
     cur_user = PhotoUser.objects.get(user__username=request.user)
-    context = {'host' :(request.scheme +"://"+ request.get_host()),'user':request.user}
+    context = {'host' :('https' +"://"+ request.get_host()),'user':request.user}
     formatted_date = dateformat.format(timezone.now(), 'Y-m-d')
     cur_user.last_visit=formatted_date
     cur_user.save()

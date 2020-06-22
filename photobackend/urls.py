@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from photoapp.views import by_short_link
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
     path('user/', include('userapp.urls')),
-    path('photo/', include('photoapp.urls'))
+    path('photo/', include('photoapp.urls')),
+    path('<str:generated_string>',by_short_link,name='short_unique'),
 ]
 
 

@@ -11,14 +11,14 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render_to_response, get_object_or_404
 from django.conf import settings
 import datetime
-
+from django.utils.six.moves.urllib.parse import urlsplit
 
 
 class FileUploadView(ListAPIView):
     permission_classes = (IsAuthenticated,)  
     def post(self, request, *args, **kwargs):
         user = PhotoUser.objects.get(user__username = request.user)
-        context = {'host' :(request.scheme +"://"+ request.get_host()),'user':request.user,'current_user_model':user}
+        context = {'host' :(urlsplit(request.build_absolute_uri(None)).scheme +"://"+ request.get_host()),'user':request.user,'current_user_model':user}
         file_serializer = FileSerializer(data=request.data,context=context)
         if file_serializer.is_valid():
             file_serializer.save()
@@ -81,7 +81,6 @@ def by_short_link(request,generated_string):
     #LAST IS KEY FIRST IS ID
     picture_id = FileSerializer.key_and_id_from_short_link(generated_string)
     photo = Photo.objects.get(id = int(picture_id))
-    host = request.scheme +"://"+ request.get_host()
     desc = photo.description
     photo_view = PhotoViews()
     photo_view.save()
@@ -93,7 +92,7 @@ def by_short_link(request,generated_string):
         pos_on_map = False
     else:
         pos_on_map = 'https://www.google.com/maps/place/{},{}'.format(pos[0].latitude,pos[0].longitude)
-    pic_propenty = {'host':host,'picture_url':photo.image.url,'geopostion':pos_on_map,'desc':desc}
+    pic_propenty = { 'picture_url':photo.image.url,'geopostion':pos_on_map,'desc':desc}
     return render_to_response('photoapp/photo.html',pic_propenty)
 
 

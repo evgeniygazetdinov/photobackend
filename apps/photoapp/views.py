@@ -1,9 +1,9 @@
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
 from rest_framework import status
-from .serializers import FileSerializer,PositionSerializer
+from .serializers import FileSerializer, UploadListSerializer
 import os
-from .models import Photo,PhotoViews,PhotoPosition
+from .models import Photo, PhotoViews, PhotoPosition, UploadList
 from rest_framework.permissions import IsAuthenticated  # <-- Here
 from userapp.models import PhotoUser
 from rest_framework.decorators import api_view,permission_classes,action
@@ -12,6 +12,8 @@ from django.shortcuts import render_to_response, get_object_or_404
 from django.conf import settings
 import datetime
 from django.utils.six.moves.urllib.parse import urlsplit
+import ast
+
 
 
 class FileUploadView(ListAPIView):
@@ -26,7 +28,20 @@ class FileUploadView(ListAPIView):
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['POST'])
+@permission_classes((IsAuthenticated, ))
+def add_photos_to_upload_list(request):
+    #
+    photos= request.data['photos']
+    phots =[]
+    from_request = photos.split(',')
+    for photo in from_request:
+        phots.append(photo)
+    print(phots)
+    user = PhotoUser.objects.get(user__username = request.user)
+    serializer = UploadListSerializer(data=request.data,context=context)
 
+    return Response('1')
 
 
 
@@ -78,7 +93,6 @@ def change_photo_description(request):
 @api_view(['GET'])
 @permission_classes((IsAuthenticated, ))
 def by_short_link(request,generated_string):
-    #LAST IS KEY FIRST IS ID
     picture_id = FileSerializer.key_and_id_from_short_link(generated_string)
     photo = Photo.objects.get(id = int(picture_id))
     desc = photo.description

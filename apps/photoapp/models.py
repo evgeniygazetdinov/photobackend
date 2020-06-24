@@ -4,14 +4,20 @@ import time
 import os
 from django.conf import settings
 import uuid
+from django.utils import timezone
+import pytz
 
-
-
+class UploadList(models.Model):
+    user = models.ForeignKey('userapp.photouser',on_delete=models.CASCADE,blank=True,null=True)
+    pub_date = models.DateTimeField(default=timezone.now)
+    photos = models.ManyToManyField('photoapp.photo')
 
 class PhotoViews(models.Model):
     views = models.DateTimeField(auto_now_add=True)
 
+
 class PhotoPosition(models.Model):
+    photo_with_position = models.ManyToManyField('photoapp.photo')
     latitude = models.DecimalField(max_digits=5, decimal_places=2,default=0.0)
     longitude = models.DecimalField(max_digits=5, decimal_places=2,default=0.0)
 
@@ -23,3 +29,7 @@ class Photo(models.Model):
     views = models.ManyToManyField(PhotoViews)
     position = models.ManyToManyField('photoapp.photoposition')
     description = models.TextField(null=True, blank=True)
+    upload_list = models.ForeignKey('photoapp.uploadlist',on_delete=models.CASCADE, blank=True,null=True)
+    
+    def save(self, *args, **kwargs):
+        super(ProgramItem, self).save(*args, **kwargs)

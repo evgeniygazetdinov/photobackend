@@ -15,6 +15,7 @@ class PhotoUser(models.Model):
     image =  models.ManyToManyField('photoapp.photo')
     time_for_clear_messages = models.IntegerField(default=60)
     last_visit = models.DateField(null=True, blank=True)
+    upload_lists = models.ManyToManyField('photoapp.uploadlist')
 
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):

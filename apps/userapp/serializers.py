@@ -2,7 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
 from .models import PhotoUser
-from photoapp.models import Photo
+from photoapp.models import Photo,UploadList
 from photoapp.serializers import FileSerializer
 from django.forms.models import model_to_dict
 from datetime import datetime, timedelta
@@ -35,8 +35,11 @@ class UserSerializer(serializers.ModelSerializer):
         if is_already_exists:
             raise serializers.ValidationError('already exists')
         return data
-
-
+    def get_uploads_list(self,obj):
+        lists = UploadList.objects.all().filter(user__id=obj.user.id)
+        print(lists.values())
+        return 1
+        
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
         serializer = FileSerializer(instance=photos, many=True,context=self.context)
@@ -58,10 +61,11 @@ class UserSerializer(serializers.ModelSerializer):
     time_for_clear_messages = serializers.SerializerMethodField(method_name='user_time_for_clear')
     last_visit = serializers.SerializerMethodField(method_name='user_last_visit')
     photos = serializers.SerializerMethodField(method_name='get_images') 
+    upload_list = serializers.SerializerMethodField(method_name='get_uploads_list')
 
     class Meta:
         model = User
-        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','password')
+        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','password','upload_list')
   
 
 class ChangePasswordSerializer(serializers.Serializer):

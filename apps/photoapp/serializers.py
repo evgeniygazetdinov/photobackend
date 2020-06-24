@@ -14,25 +14,23 @@ import base64
 import uuid
 
 
-class PositionSerializer(serializers.ModelSerializer):
-    def get_id(self,obj):
+class UploadListSerializer(serializers.ModelSerializer):
+    def indify_user(self,obj):
 
         return obj.id
 
 
-    def get_latitude(self,obj):
+    def get_photos_from_upload_list(self,obj):
         return 1
     
-    
-    def get_longtude(self,obj):
-        return 1    
 
+    user = serializers.SerializerMethodField(method_name='indify_user')
+    date_upload =  serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, source='uploadlist.pub_date')
+    photos  = serializers.SerializerMethodField(method_name='get_photos_from_upload_list')
 
-    id = serializers.SerializerMethodField(method_name='get_id')
-    longitude = serializers.SerializerMethodField(method_name='get_latitude')
-    latitude  = serializers.SerializerMethodField(method_name='get_longtude')
-
-
+    class Meta:
+        model = Photo
+        fields = ('id','user', 'date_upload',  'photos')
 
 
 class FileSerializer(serializers.ModelSerializer):

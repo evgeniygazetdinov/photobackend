@@ -8,9 +8,8 @@ from django.utils import timezone
 import pytz
 
 class UploadList(models.Model):
-    user = models.ForeignKey('userapp.photouser',on_delete=models.CASCADE,blank=True,null=True)
+    user = models.ManyToManyField('userapp.photouser')
     pub_date = models.DateTimeField(default=timezone.now)
-    photos = models.ManyToManyField('photoapp.photo')
 
 class PhotoViews(models.Model):
     views = models.DateTimeField(auto_now_add=True)
@@ -29,7 +28,5 @@ class Photo(models.Model):
     views = models.ManyToManyField(PhotoViews)
     position = models.ManyToManyField('photoapp.photoposition')
     description = models.TextField(null=True, blank=True)
-    upload_list = models.ForeignKey('photoapp.uploadlist',on_delete=models.CASCADE, blank=True,null=True)
+    upload_list = models.ManyToManyField('photoapp.uploadlist')
     
-    def save(self, *args, **kwargs):
-        super(ProgramItem, self).save(*args, **kwargs)

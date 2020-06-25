@@ -32,16 +32,14 @@ class FileUploadView(ListAPIView):
 @permission_classes((IsAuthenticated, ))
 def add_photos_to_upload_list(request):
     #
-    photos= request.data['photos']
-    phots =[]
-    from_request = photos.split(',')
-    for photo in from_request:
-        phots.append(photo)
-    print(phots)
+    
     user = PhotoUser.objects.get(user__username = request.user)
-    serializer = UploadListSerializer(data=request.data,context=context)
-
-    return Response('1')
+    queryset = UploadList.objects.filter(user=user)
+    context = {'user':user,'request': request.data}
+    # serializer = UploadListSerializer(instance=queryset,context=context)
+    # if serializer.is_valid():
+        # return Response(serializer.data,status=status.HTTP_201_CREATED)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 

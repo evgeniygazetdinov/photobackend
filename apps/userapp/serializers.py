@@ -35,10 +35,11 @@ class UserSerializer(serializers.ModelSerializer):
         if is_already_exists:
             raise serializers.ValidationError('already exists')
         return data
+
     def get_uploads_list(self,obj):
-        lists = UploadList.objects.all().filter(user__id=obj.user.id)
-        print(lists.values())
-        return 1
+        photo_user = PhotoUser.objects.filter(user__username='vitor89')
+        lists = UploadList.objects.filter(user=photo_user)
+        return lists.values('id')
         
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)

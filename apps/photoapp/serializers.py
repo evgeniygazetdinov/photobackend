@@ -175,28 +175,14 @@ class UploadListSerializer(serializers.ModelSerializer):
     #     user.save()
     #     return user
 
-    def find_photos_names_in_request(self):
-        photos = self.context['request']['photos']
-        phots =[]
-        from_request = photos.split(',')
-        for photo in from_request:
-            phots.append(photo)
-        return phots
 
-
-    def validate(self, data):
-        return data
-    def indify_user(self,obj):
-        return self.context['user'].user.username
        
 
 
     def get_photos_from_upload_list(self,obj):
-        photos = []
-        photos_from_requests = self.find_photos_names_in_request()
-        for photo in photos_from_requests:
-            photos.append(Photo.objects.filter(UploadList__pubdate=obj))
-        serializer = FileSerializer(instance=photos, many=True,context=self.context)
+        photos_from_upload_list = obj.image
+    
+        serializer = FileSerializer(instance=photos_from_upload_list, many=True,context=self.context)
         return serializer.data
     
 
@@ -204,10 +190,9 @@ class UploadListSerializer(serializers.ModelSerializer):
 
 
 
-    user = serializers.SerializerMethodField(method_name='indify_user')
-    date_upload =  serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S", required=False, source='uploadlist.pub_date')
+    date_upload =  serializers.DateTimeField(source='uploadlist.pub_date',required=False)
     photos  = serializers.SerializerMethodField(method_name='get_photos_from_upload_list')
 
     class Meta:
         model = Photo
-        fields = ('id','user', 'date_upload',  'photos')
+        fields = ('id', 'date_upload',  'photos')

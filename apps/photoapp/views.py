@@ -28,17 +28,34 @@ class FileUploadView(ListAPIView):
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(['GET'])
+@permission_classes((IsAuthenticated, ))
+def get_userlist(request,id):
+    lists = UploadList.objects.filter(user__user__username=request.user.username,id=id)
+    return Response('1', status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def add_photos_to_upload_list(request):
     #
-    
-    user = PhotoUser.objects.get(user__username = request.user)
-    queryset = UploadList.objects.filter(user=user)
-    context = {'user':user,'request': request.data}
-    # serializer = UploadListSerializer(instance=queryset,context=context)
-    # if serializer.is_valid():
-        # return Response(serializer.data,status=status.HTTP_201_CREATED)
+    #get photoname from request
+    #get photo objects
+    #set to all 
+    #upload list
+    #return {uploads:photos with with }
+    user = PhotoUser.objects.filter(user__username = request.user)
+    context = {'host' :('https' +"://"+ request.get_host()),'user':user}
+    queryset = UploadList.objects.create()
+    queryset.user.set(user)
+    photos = (request.data['photos']).split(',')
+    for photo in photos:
+        cur_photo = Photo.objects.get(image=photo)
+        queryset.image.add(cur_photo)
+        queryset.save()
+    serializer = UploadListSerializer(instance=queryset, data=request.data, context=context)
+    if serializer.is_valid():
+        return Response(serializer.data,status=status.HTTP_201_CREATED)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -164,4 +181,5 @@ def delete_picture_from_unique_link(request,random_string,encript,key):
     os.remove(photo.image.path)
     pic_propenty = {'user':cur_user.user.username,'picture_url':photo.image.url +' was be removed','url':request.path}
     return Response(pic_propenty, status=status.HTTP_200_OK)
+
 

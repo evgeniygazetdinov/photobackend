@@ -38,12 +38,6 @@ def get_userlist(request,id):
 @api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
 def add_photos_to_upload_list(request):
-    #
-    #get photoname from request
-    #get photo objects
-    #set to all 
-    #upload list
-    #return {uploads:photos with with }
     user = PhotoUser.objects.filter(user__username = request.user)
     context = {'host' :('https' +"://"+ request.get_host()),'user':user}
     upl_list = UploadList.objects.create()

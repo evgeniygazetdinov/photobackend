@@ -3,7 +3,7 @@ from django.contrib.auth.models import User # If used custom user model
 from django.contrib.auth.password_validation import validate_password
 from .models import PhotoUser
 from photoapp.models import Photo,UploadList
-from photoapp.serializers import FileSerializer
+from photoapp.serializers import FileSerializer,UploadListSerializer
 from django.forms.models import model_to_dict
 from datetime import datetime, timedelta
 
@@ -38,10 +38,11 @@ class UserSerializer(serializers.ModelSerializer):
 
     def get_uploads_list(self,obj):
         #need username as string
-        photo_user = PhotoUser.objects.filter(user__username='vitor89')
+        upload = UploadList.objects.all().filter(user__user__username=obj.user.username)
         #IF USER NOT UPLOADED WARNING
-        lists = UploadList.objects.filter(user=photo_user)
-        return lists
+        #need check if upload list no on user return []
+        serializer = UploadListSerializer(upload,many=True,context=self.context)
+        return serializer.data
         
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)

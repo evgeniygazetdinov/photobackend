@@ -46,17 +46,15 @@ def add_photos_to_upload_list(request):
     #return {uploads:photos with with }
     user = PhotoUser.objects.filter(user__username = request.user)
     context = {'host' :('https' +"://"+ request.get_host()),'user':user}
-    queryset = UploadList.objects.create()
-    queryset.user.set(user)
+    upl_list = UploadList.objects.create()
+    upl_list.user.set(user)
     photos = (request.data['photos']).split(',')
     for photo in photos:
         cur_photo = Photo.objects.get(image=photo)
-        queryset.image.add(cur_photo)
-        queryset.save()
-    serializer = UploadListSerializer(instance=queryset, data=request.data, context=context)
-    if serializer.is_valid():
-        return Response(serializer.data,status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        upl_list.images.add(cur_photo)
+        upl_list.save()
+    serializer = UploadListSerializer(upl_list,context=context)
+    return Response(serializer.data,status=status.HTTP_201_CREATED)
 
 
 

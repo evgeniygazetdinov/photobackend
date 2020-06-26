@@ -33,7 +33,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='uploadlist',
             name='user',
-            field=models.ForeignKey(default='some_user', on_delete=django.db.models.deletion.CASCADE, to='userapp.PhotoUser'),
+            field=models.ForeignKey(default='', on_delete=django.db.models.deletion.CASCADE, to='userapp.PhotoUser'),
             preserve_default=False,
         ),
     ]

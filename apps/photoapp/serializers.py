@@ -168,29 +168,14 @@ class FileSerializer(serializers.ModelSerializer):
 
 
 class UploadListSerializer(serializers.ModelSerializer):
-    # def create(self, validated_data):
-    #     user = UploadList.objects.create(
-    #     user=validated_data['request']['user'])
-    #     user.photos.set(validated_data['request']['photos'])
-    #     user.save()
-    #     return user
-
-
-       
 
 
     def get_photos_from_upload_list(self,obj):
-        photos_from_upload_list = obj.image
-    
+        photos_from_upload_list = obj.images
         serializer = FileSerializer(instance=photos_from_upload_list, many=True,context=self.context)
         return serializer.data
     
-
-
-
-
-
-    date_upload =  serializers.DateTimeField(source='uploadlist.pub_date',required=False)
+    date_upload =  serializers.DateTimeField(source='pub_date',format="%d-%m-%Y %H:%M", input_formats=['%d-%m-%Y', 'iso-8601'])
     photos  = serializers.SerializerMethodField(method_name='get_photos_from_upload_list')
 
     class Meta:

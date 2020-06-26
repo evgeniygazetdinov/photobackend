@@ -37,9 +37,11 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def get_uploads_list(self,obj):
+        #need username as string
         photo_user = PhotoUser.objects.filter(user__username='vitor89')
+        #IF USER NOT UPLOADED WARNING
         lists = UploadList.objects.filter(user=photo_user)
-        return lists.values('id')
+        return lists
         
     def get_images(self,obj):
         photos = Photo.objects.all().filter(user__user__username=obj.user.username)
@@ -66,7 +68,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','password','upload_list')
+        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','upload_list','password')
   
 
 class ChangePasswordSerializer(serializers.Serializer):

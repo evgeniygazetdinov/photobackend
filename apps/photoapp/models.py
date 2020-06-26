@@ -10,7 +10,7 @@ import pytz
 class UploadList(models.Model):
     user = models.ManyToManyField('userapp.photouser')
     pub_date = models.DateTimeField(default=timezone.now)
-    image = models.ManyToManyField('photoapp.photo')
+    images = models.ManyToManyField('photoapp.photo')
 
 class PhotoViews(models.Model):
     views = models.DateTimeField(auto_now_add=True)

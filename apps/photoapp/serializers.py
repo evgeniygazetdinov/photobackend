@@ -175,7 +175,7 @@ class UploadListSerializer(serializers.ModelSerializer):
         serializer = FileSerializer(instance=photos_from_upload_list, many=True,context=self.context)
         return serializer.data
     
-    date_upload =  serializers.DateTimeField(source='pub_date',format="%d-%m-%Y %H:%M", input_formats=['%d-%m-%Y', 'iso-8601'])
+    date_upload =  serializers.DateTimeField(source='pub_date',format="%Y-%m-%d %H:%M", input_formats=['%d-%m-%Y', 'iso-8601'])
     photos  = serializers.SerializerMethodField(method_name='get_photos_from_upload_list')
 
     class Meta:

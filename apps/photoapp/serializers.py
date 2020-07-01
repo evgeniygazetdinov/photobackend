@@ -174,8 +174,12 @@ class UploadListSerializer(serializers.ModelSerializer):
         photos_from_upload_list = obj.images
         serializer = FileSerializer(instance=photos_from_upload_list, many=True,context=self.context)
         return serializer.data
-    
-    date_upload =  serializers.DateTimeField(source='pub_date',format="%Y-%m-%d %H:%M", input_formats=['%d-%m-%Y', 'iso-8601'])
+
+    def time_format(self,obj):
+        obj_time = obj.pub_date+timedelta(hours=3)
+        return  obj_time.strftime("%Y-%m-%d %H:%M")
+
+    date_upload =  serializers.SerializerMethodField(method_name='time_format')
     photos  = serializers.SerializerMethodField(method_name='get_photos_from_upload_list')
 
     class Meta:

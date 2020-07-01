@@ -37,17 +37,13 @@ class UserSerializer(serializers.ModelSerializer):
         return data
 
     def get_uploads_list(self,obj):
-        #need username as string
         upload = UploadList.objects.all().filter(user__user__username=obj.user.username)
-        #IF USER NOT UPLOADED WARNING
-        #need check if upload list no on user return []
         serializer = UploadListSerializer(upload,many=True,context=self.context)
         return serializer.data
         
     def get_images(self,obj):
-        photos = Photo.objects.all().filter(user__user__username=obj.user.username)
-        serializer = FileSerializer(instance=photos, many=True,context=self.context)
-        return serializer.data
+        #for old versions
+        return []
     
     def user_last_visit(self,obj):
         visit = UserModel.objects.get(id = obj.user.id)
@@ -55,8 +51,15 @@ class UserSerializer(serializers.ModelSerializer):
 
     def user_time_for_clear(self,obj):
         time = UserModel.objects.get(id = obj.user.id)
-
         return time.time_for_clear_messages
+
+
+    def find_without_list(self,obj):
+        photos = Photo.objects.all().filter(user__user__username=obj.user.username,upload_list__id=None)
+        serializer = FileSerializer(instance=photos, many=True,context=self.context)
+        return serializer.data
+
+
 
     id = serializers.CharField(source="user.id",required=False)
     password = serializers.CharField(source='user.password',write_only=True)
@@ -66,10 +69,10 @@ class UserSerializer(serializers.ModelSerializer):
     last_visit = serializers.SerializerMethodField(method_name='user_last_visit')
     photos = serializers.SerializerMethodField(method_name='get_images') 
     upload_list = serializers.SerializerMethodField(method_name='get_uploads_list')
-
+    photos_without_upload_list = serializers.SerializerMethodField(method_name='find_without_list')
     class Meta:
         model = User
-        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','upload_list','password')
+        fields = ('id','username','is_admin','last_visit','time_for_clear_messages','photos','upload_list','password','photos_without_upload_list')
   
 
 class ChangePasswordSerializer(serializers.Serializer):

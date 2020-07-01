@@ -15,7 +15,6 @@ from django.utils.six.moves.urllib.parse import urlsplit
 import ast
 
 
-
 class FileUploadView(ListAPIView):
     permission_classes = (IsAuthenticated,)  
     def post(self, request, *args, **kwargs):
@@ -28,11 +27,19 @@ class FileUploadView(ListAPIView):
         return Response(file_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
+@api_view(['POST'])
 @permission_classes((IsAuthenticated, ))
-def get_userlist(request,id):
-    lists = UploadList.objects.filter(user__user__username=request.user.username,id=id)
-    return Response('1', status=status.HTTP_400_BAD_REQUEST)
+def remove_upload_list_by_date(request):
+    date_upload =request.data['date_upload']
+    date_time_obj = datetime.datetime.strptime(date_upload, '%Y-%m-%d %H:%M')
+    upload_list = UploadList.objects.filter(pub_date__year=date_time_obj.year,pub_date__month=date_time_obj.month,
+    pub_date__hour =date_time_obj.hour-3,pub_date__minute = date_time_obj.minute,
+    pub_date__day = date_time_obj.day)
+    if upload_list.exists():
+        upload_list.delete()
+        return Response('upload_list {} deleted'.format(date_upload), status=status.HTTP_200_OK)
+    else:
+        return Response('date not exists', status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 @api_view(['POST'])

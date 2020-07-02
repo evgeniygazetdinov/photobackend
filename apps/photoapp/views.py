@@ -31,9 +31,9 @@ class FileUploadView(ListAPIView):
 @permission_classes((IsAuthenticated, ))
 def remove_upload_list_by_date(request):
     date_upload =request.data['date_upload']
-    date_time_obj = datetime.datetime.strptime(date_upload, '%Y-%m-%d %H:%M')
+    date_time_obj = (datetime.datetime.strptime(date_upload, '%Y-%m-%d %H:%M') - datetime.timedelta(hours=3))
     upload_list = UploadList.objects.filter(pub_date__year=date_time_obj.year,pub_date__month=date_time_obj.month,
-    pub_date__hour =date_time_obj.hour-3,pub_date__minute = date_time_obj.minute,
+    pub_date__hour =date_time_obj.hour,pub_date__minute = date_time_obj.minute,
     pub_date__day = date_time_obj.day)
     if upload_list.exists():
         upload_list.delete()
